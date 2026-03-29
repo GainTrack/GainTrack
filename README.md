@@ -11,7 +11,7 @@ Cilj projekta GainTrack je razviti jednostavnu i preglednu web aplikaciju koja k
 ### Backend
 - Java 25
 - Spring Boot 4.0.5
-- Postgres
+- Postgres 18
 
 ### Frontend
 - MVC with Thymeleaf
