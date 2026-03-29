@@ -19,6 +19,17 @@ Cilj projekta GainTrack je razviti jednostavnu i preglednu web aplikaciju koja k
 
 ## Upute za razvojne inženjere
 
+### Requirements
+
+- Java 25
+- Docker
+
+### Razvoj
+
+- Pokretanje i zaustavljanje baze (iz project root foldera!):
+  - `docker compose up -d`
+  - `docker compose down`
+
 - Pokretanje aplikacije: `./mvnw spring-boot:run`
 
 - Pokretanje testova: `./mvnw test`
