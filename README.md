@@ -16,6 +16,18 @@ Cilj projekta GainTrack je razviti jednostavnu i preglednu web aplikaciju koja k
 ### Frontend
 - MVC with Thymeleaf
 
+
+## Upute za razvojne inženjere
+
+- Pokretanje aplikacije: `./mvnw spring-boot:run`
+
+- Pokretanje testova: `./mvnw test`
+
+- Brisanje build outputa: `./mvnw clean`
+
+- Buildanje artefakta (finalne .jar datoteke): `./mvnw verify`
+
+
 ## Uloge
 - Product Owner: Aleksander Radovan
 - Scrum Master: Alen Bogadi
