@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="hr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Vježbe</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" th:href="@{/css/exercises.css}">
+</head>
+<body>
+<div class="container">
+
+    <div class="page-header">
+        <h1>Vježbe</h1>
+        <p>Pregled svih dostupnih vježbi</p>
+    </div>
+    <div class="search-section">
+        <form th:action="@{/exercises}" method="get" class="search-form">
+            <input
+                    type="text"
+                    name="search"
+                    class="search-input"
+                    placeholder="Pretraži vježbe po nazivu ili opisu..."
+                    th:value="${search}">
+            <button type="submit" class="search-btn">Pretraži</button>
+
+            <a th:if="${search != null && !#strings.isEmpty(search)}"
+               th:href="@{/exercises}"
+               class="clear-search-btn">
+                Očisti
+            </a>
+        </form>
+    </div>
+    <p class="results-count" th:if="${search != null && !#strings.isEmpty(search)}">
+        Rezultati za "<strong th:text="${search}">bench</strong>":
+        <strong th:text="${#lists.size(exercises)}">0</strong>
+    </p>
+
+    <p class="results-count" th:if="${search == null || #strings.isEmpty(search)}">
+        Ukupno vježbi: <strong th:text="${#lists.size(exercises)}">0</strong>
+    </p>
+
+    <div th:if="${!#lists.isEmpty(exercises)}" class="exercise-grid">
+        <div th:each="exercise : ${exercises}" class="exercise-card">
+
+            <div class="card-top">
+                <div class="exercise-icon"
+                     th:classappend="${
+                        exercise.type.name() == 'STRENGTH' ? ' type-strength' :
+                        (exercise.type.name() == 'CARDIO' ? ' type-cardio' : ' type-flexibility')
+                     }">
+                    🏋
+                </div>
+
+                <div class="card-actions">
+                    <a th:href="@{/exercises/{id}/edit(id=${exercise.id})}" class="action-btn edit-btn">
+                        Uredi
+                    </a>
+                    <button type="button"
+                            class="action-btn delete-btn"
+                            th:attr="data-id=${exercise.id},data-name=${exercise.name}"
+                            onclick="openDeleteModal(this)">
+                        Obriši
+                    </button>
+                </div>
+            </div>
+
+            <div class="type-badge"
+                 th:text="${exercise.type}"
+                 th:classappend="${
+                    exercise.type.name() == 'STRENGTH' ? ' badge-strength' :
+                    (exercise.type.name() == 'CARDIO' ? ' badge-cardio' : ' badge-flexibility')
+                 }">
+                STRENGTH
+            </div>
+
+            <h3 class="exercise-title" th:text="${exercise.name}">Bench Press</h3>
+
+            <p class="exercise-description"
+               th:text="${exercise.description != null && !#strings.isEmpty(exercise.description) ? exercise.description : 'Nema opisa za ovu vježbu.'}">
+                Opis vježbe
+            </p>
+
+            <div class="meta-block">
+                <div class="meta-label">Mišićne skupine:</div>
+
+                <div class="muscle-tags" th:if="${!#sets.isEmpty(exercise.exerciseMuscles)}">
+                    <span class="muscle-tag"
+                          th:each="exerciseMuscle : ${exercise.exerciseMuscles}"
+                          th:text="${exerciseMuscle.muscleGroup.name}">
+                        Prsa
+                    </span>
+                </div>
+
+                <div th:if="${#sets.isEmpty(exercise.exerciseMuscles)}" class="no-muscles">
+                    Nisu dodijeljene mišićne skupine
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div th:if="${#lists.isEmpty(exercises)}" class="empty-state">
+        Nema pronađenih vježbi.
+    </div>
+
+</div>
+
+<div id="deleteModal" class="modal-overlay">
+    <div class="modal">
+        <h3>Potvrda brisanja</h3>
+        <p id="deleteModalText">Jeste li sigurni da želite izbrisati ovu vježbu?</p>
+
+        <form id="deleteForm" method="post">
+            <div class="modal-actions">
+                <button type="button" class="modal-btn cancel-btn" onclick="closeDeleteModal()">
+                    Odustani
+                </button>
+                <button type="submit" class="modal-btn confirm-delete-btn">
+                    Izbriši
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script th:src="@{/js/exercises.js}"></script>
+</body>
+</html>

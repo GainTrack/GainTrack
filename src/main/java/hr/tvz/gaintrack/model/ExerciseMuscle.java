@@ -17,4 +17,32 @@ public class  ExerciseMuscle {
     @ManyToOne(optional = false)
     @JoinColumn(name = "muscle_group_id", nullable = false)
     private MuscleGroup muscleGroup;
+
+
+    public ExerciseMuscle() {
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public Exercise getExercise() {
+        return exercise;
+    }
+
+    public MuscleGroup getMuscleGroup() {
+        return muscleGroup;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public void setExercise(Exercise exercise) {
+        this.exercise = exercise;
+    }
+
+    public void setMuscleGroup(MuscleGroup muscleGroup) {
+        this.muscleGroup = muscleGroup;
+    }
 }
