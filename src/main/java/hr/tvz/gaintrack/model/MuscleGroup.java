@@ -3,7 +3,12 @@ package hr.tvz.gaintrack.model;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "muscle_group")
+@Table(
+        name = "muscle_group",
+        uniqueConstraints = {
+                @UniqueConstraint(name = "uk_muscle_group_name", columnNames = "name")
+        }
+)
 public class MuscleGroup {
 
     @Id
