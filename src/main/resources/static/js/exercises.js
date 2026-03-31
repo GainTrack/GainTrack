@@ -7,7 +7,7 @@ function openDeleteModal(button) {
     const text = document.getElementById('deleteModalText');
 
     form.action = '/exercises/' + id + '/delete';
-    text.textContent = 'Jeste li sigurni da želite izbrisati vježbu "' + name + '"?';
+    text.textContent = 'Are you sure you want to delete the exercise "' + name + '"?';
 
     modal.classList.add('show');
 }
