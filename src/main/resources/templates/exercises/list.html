@@ -84,15 +84,15 @@
             <div class="meta-block">
                 <div class="meta-label">Mišićne skupine:</div>
 
-                <div class="muscle-tags" th:if="${!#sets.isEmpty(exercise.exerciseMuscles)}">
-                    <span class="muscle-tag"
-                          th:each="exerciseMuscle : ${exercise.exerciseMuscles}"
-                          th:text="${exerciseMuscle.muscleGroup.name}">
-                        Prsa
-                    </span>
+                <div class="muscle-tags" th:if="${!#sets.isEmpty(exercise.muscleGroups)}">
+    <span class="muscle-tag"
+          th:each="muscleGroup : ${exercise.muscleGroups}"
+          th:text="${muscleGroup.name}">
+        Prsa
+    </span>
                 </div>
 
-                <div th:if="${#sets.isEmpty(exercise.exerciseMuscles)}" class="no-muscles">
+                <div th:if="${#sets.isEmpty(exercise.muscleGroups)}" class="no-muscles">
                     Nisu dodijeljene mišićne skupine
                 </div>
             </div>

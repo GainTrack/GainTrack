@@ -1,7 +1,6 @@
 package hr.tvz.gaintrack.service;
 
 import hr.tvz.gaintrack.model.Exercise;
-import hr.tvz.gaintrack.repository.ExerciseMuscleRepository;
 import hr.tvz.gaintrack.repository.ExerciseRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,12 +11,9 @@ import java.util.List;
 public class ExerciseService {
 
     private final ExerciseRepository exerciseRepository;
-    private final ExerciseMuscleRepository exerciseMuscleRepository;
 
-    public ExerciseService(ExerciseRepository exerciseRepository,
-                           ExerciseMuscleRepository exerciseMuscleRepository) {
+    public ExerciseService(ExerciseRepository exerciseRepository) {
         this.exerciseRepository = exerciseRepository;
-        this.exerciseMuscleRepository = exerciseMuscleRepository;
     }
 
     public List<Exercise> findAll() {
@@ -26,8 +22,13 @@ public class ExerciseService {
 
     @Transactional
     public void deleteById(Long id) {
-        exerciseMuscleRepository.deleteByExercise_Id(id);
-        exerciseRepository.deleteById(id);
+        Exercise exercise = exerciseRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Exercise not found with id: " + id));
+
+        exercise.getMuscleGroups().clear();
+        exerciseRepository.save(exercise);
+
+        exerciseRepository.delete(exercise);
     }
 
     public List<Exercise> search(String search) {
@@ -39,7 +40,4 @@ public class ExerciseService {
         return exerciseRepository
                 .findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseOrderByNameAsc(query, query);
     }
-
-
-
 }

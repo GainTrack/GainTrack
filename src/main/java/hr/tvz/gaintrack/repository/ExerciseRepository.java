@@ -8,23 +8,14 @@ import java.util.List;
 
 public interface ExerciseRepository extends JpaRepository<Exercise, Long> {
 
-    @EntityGraph(attributePaths = {
-            "exerciseMuscles",
-            "exerciseMuscles.muscleGroup"
-    })
+    @Override
+    @EntityGraph(attributePaths = {"muscleGroups"})
     List<Exercise> findAll();
 
-
-    @EntityGraph(attributePaths = {
-            "exerciseMuscles",
-            "exerciseMuscles.muscleGroup"
-    })
+    @EntityGraph(attributePaths = {"muscleGroups"})
     List<Exercise> findAllByOrderByNameAsc();
 
-    @EntityGraph(attributePaths = {
-            "exerciseMuscles",
-            "exerciseMuscles.muscleGroup"
-    })
+    @EntityGraph(attributePaths = {"muscleGroups"})
     List<Exercise> findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseOrderByNameAsc(
             String name,
             String description

@@ -5,7 +5,12 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "exercise")
+@Table(
+        name = "exercise",
+        uniqueConstraints = {
+                @UniqueConstraint(name = "uk_exercise_name", columnNames = "name")
+        }
+)
 public class Exercise {
 
     @Id
@@ -22,8 +27,19 @@ public class Exercise {
     @Column(nullable = false)
     private ExerciseType type;
 
-    @OneToMany(mappedBy = "exercise", fetch = FetchType.LAZY)
-    private Set<ExerciseMuscle> exerciseMuscles = new HashSet<>();
+    @ManyToMany
+    @JoinTable(
+            name = "exercise_muscle_group",
+            joinColumns = @JoinColumn(name = "exercise_id"),
+            inverseJoinColumns = @JoinColumn(name = "muscle_group_id"),
+            uniqueConstraints = {
+                    @UniqueConstraint(
+                            name = "uk_exercise_muscle_group",
+                            columnNames = {"exercise_id", "muscle_group_id"}
+                    )
+            }
+    )
+    private Set<MuscleGroup> muscleGroups = new HashSet<>();
 
     public Exercise() {}
 
@@ -31,11 +47,11 @@ public class Exercise {
     public String getName() { return name; }
     public String getDescription() { return description; }
     public ExerciseType getType() { return type; }
-    public Set<ExerciseMuscle> getExerciseMuscles() { return exerciseMuscles; }
+    public Set<MuscleGroup> getMuscleGroups() { return muscleGroups; }
 
     public void setId(Long id) { this.id = id; }
     public void setName(String name) { this.name = name; }
     public void setDescription(String description) { this.description = description; }
     public void setType(ExerciseType type) { this.type = type; }
-    public void setExerciseMuscles(Set<ExerciseMuscle> exerciseMuscles) { this.exerciseMuscles = exerciseMuscles; }
+    public void setMuscleGroups(Set<MuscleGroup> muscleGroups) { this.muscleGroups = muscleGroups; }
 }
