@@ -36,5 +36,4 @@ public class MuscleGroup {
     public void setName(String name) {
         this.name = name;
     }
-
 }
