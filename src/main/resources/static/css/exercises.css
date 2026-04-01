@@ -1,0 +1,356 @@
+/* =========================
+   1. Base
+   ========================= */
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f8fafc;
+    color: #1e293b;
+}
+
+/* =========================
+   2. Layout
+   ========================= */
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 32px 20px;
+}
+
+.exercise-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+/* =========================
+   3. Header + Search
+   ========================= */
+
+.page-header {
+    margin-bottom: 28px;
+}
+
+.page-header h1 {
+    margin: 0 0 8px;
+    font-size: 32px;
+}
+
+.page-header p,
+.results-count {
+    margin: 0;
+    color: #64748b;
+    font-size: 15px;
+}
+
+.results-count {
+    margin-bottom: 18px;
+    font-size: 14px;
+}
+
+.search-section {
+    margin-bottom: 24px;
+}
+
+.search-form {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.search-input {
+    flex: 1;
+    min-width: 260px;
+    padding: 12px 14px;
+    border: 1px solid #cbd5e1;
+    border-radius: 12px;
+    background: #fff;
+    color: #1e293b;
+    font-size: 14px;
+    outline: none;
+}
+
+.search-input:focus {
+    border-color: #94a3b8;
+    box-shadow: 0 0 0 3px rgba(148, 163, 184, 0.15);
+}
+
+/* =========================
+   4. Card
+   ========================= */
+
+.exercise-card {
+    background: #fff;
+    border-radius: 18px;
+    padding: 22px;
+    box-shadow: 0 4px 18px rgba(15, 23, 42, 0.06);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.exercise-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+}
+
+.card-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 18px;
+}
+
+.exercise-icon {
+    width: 52px;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border-radius: 16px;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.exercise-title {
+    margin: 0 0 10px;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.exercise-description {
+    margin: 0 0 16px;
+    min-height: 42px;
+    color: #64748b;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+/* =========================
+   5. Meta / badges / tags
+   ========================= */
+
+.meta-block {
+    font-size: 14px;
+    color: #475569;
+}
+
+.meta-label {
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.type-badge,
+.muscle-tag {
+    display: inline-block;
+    border-radius: 999px;
+    font-size: 12px;
+}
+
+.type-badge {
+    margin-bottom: 14px;
+    padding: 6px 10px;
+    font-weight: 600;
+}
+
+.muscle-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.muscle-tag {
+    padding: 6px 10px;
+    background: #f1f5f9;
+    color: #334155;
+}
+
+.no-muscles {
+    margin-top: 8px;
+    color: #94a3b8;
+}
+
+/* Type colors */
+
+.type-strength,
+.badge-strength {
+    background: #dbeafe;
+    color: #2563eb;
+}
+
+.type-cardio,
+.badge-cardio {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.type-flexibility,
+.badge-flexibility {
+    background: #f3e8ff;
+    color: #9333ea;
+}
+
+/* =========================
+   6. Buttons
+   ========================= */
+
+.card-actions,
+.modal-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.card-actions {
+    gap: 8px;
+}
+
+.action-btn,
+.modal-btn,
+.search-btn,
+.clear-search-btn {
+    border: none;
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 14px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: 0.2s;
+}
+
+.action-btn {
+    padding: 8px 10px;
+    background: #f1f5f9;
+    color: #334155;
+    font-size: 13px;
+}
+
+.action-btn:hover {
+    background: #e2e8f0;
+}
+
+.edit-btn {
+    background: #e0f2fe;
+    color: #0369a1;
+}
+
+.edit-btn:hover {
+    background: #bae6fd;
+}
+
+.delete-btn {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+.delete-btn:hover {
+    background: #fecaca;
+}
+
+.search-btn,
+.clear-search-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 16px;
+    border-radius: 12px;
+}
+
+.search-btn {
+    background: #0f172a;
+    color: #fff;
+}
+
+.search-btn:hover {
+    background: #1e293b;
+}
+
+.clear-search-btn {
+    background: #e2e8f0;
+    color: #334155;
+}
+
+.clear-search-btn:hover {
+    background: #cbd5e1;
+}
+
+.modal-btn {
+    padding: 10px 16px;
+}
+
+.cancel-btn {
+    background: #e2e8f0;
+    color: #334155;
+}
+
+.cancel-btn:hover {
+    background: #cbd5e1;
+}
+
+.confirm-delete-btn {
+    background: #dc2626;
+    color: #fff;
+}
+
+.confirm-delete-btn:hover {
+    background: #b91c1c;
+}
+
+/* =========================
+   7. Modal
+   ========================= */
+
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+    padding: 20px;
+    background: rgba(15, 23, 42, 0.45);
+}
+
+.modal-overlay.show {
+    display: flex;
+}
+
+.modal {
+    width: 100%;
+    max-width: 420px;
+    padding: 24px;
+    border-radius: 18px;
+    background: #fff;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.18);
+}
+
+.modal h3 {
+    margin: 0 0 10px;
+    font-size: 22px;
+}
+
+.modal p {
+    margin: 0 0 22px;
+    color: #475569;
+    line-height: 1.5;
+}
+
+.modal-actions {
+    justify-content: flex-end;
+}
+
+/* =========================
+   8. Empty state
+   ========================= */
+
+.empty-state {
+    margin-top: 60px;
+    text-align: center;
+    color: #64748b;
+    font-size: 16px;
+}

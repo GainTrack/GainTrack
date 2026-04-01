@@ -1,7 +1,6 @@
 package hr.tvz.gaintrack.model;
 
 import jakarta.persistence.*;
-
 import java.util.HashSet;
 import java.util.Set;
 
@@ -41,4 +40,18 @@ public class Exercise {
             }
     )
     private Set<MuscleGroup> muscleGroups = new HashSet<>();
+
+    public Exercise() {}
+
+    public Long getId() { return id; }
+    public String getName() { return name; }
+    public String getDescription() { return description; }
+    public ExerciseType getType() { return type; }
+    public Set<MuscleGroup> getMuscleGroups() { return muscleGroups; }
+
+    public void setId(Long id) { this.id = id; }
+    public void setName(String name) { this.name = name; }
+    public void setDescription(String description) { this.description = description; }
+    public void setType(ExerciseType type) { this.type = type; }
+    public void setMuscleGroups(Set<MuscleGroup> muscleGroups) { this.muscleGroups = muscleGroups; }
 }
