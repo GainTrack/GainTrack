@@ -2,6 +2,7 @@ package hr.tvz.gaintrack.controller;
 
 import hr.tvz.gaintrack.model.Exercise;
 import hr.tvz.gaintrack.model.ExerciseType;
+import hr.tvz.gaintrack.model.MuscleGroup;
 import hr.tvz.gaintrack.service.ExerciseService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Controller
 public class ExerciseController {
@@ -40,6 +42,27 @@ public class ExerciseController {
     public String createExercise(@ModelAttribute Exercise exercise,
                                  @RequestParam(required = false) List<Long> muscleGroupIds) {
         exerciseService.createExercise(exercise, muscleGroupIds);
+        return "redirect:/exercises";
+    }
+
+    @GetMapping("/exercises/{id}/edit")
+    public String showEditForm(@PathVariable Long id, Model model) {
+        Exercise exercise = exerciseService.getExerciseById(id);
+        model.addAttribute("exercise", exercise);
+        model.addAttribute("exerciseTypes", ExerciseType.values());
+        model.addAttribute("muscleGroups", exerciseService.findAllMuscleGroups());
+        model.addAttribute(
+                "selectedMuscleGroupIds",
+                exercise.getMuscleGroups().stream().map(MuscleGroup::getId).collect(Collectors.toSet())
+        );
+        return "exercises/editForm";
+    }
+
+    @PostMapping("/exercises/{id}/edit")
+    public String editExercise(@PathVariable Long id,
+                               @ModelAttribute Exercise exercise,
+                               @RequestParam(required = false) List<Long> muscleGroupIds) {
+        exerciseService.updateExercise(id, exercise, muscleGroupIds);
         return "redirect:/exercises";
     }
 
