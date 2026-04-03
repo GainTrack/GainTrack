@@ -25,6 +25,11 @@ public class ExerciseService {
         return exerciseRepository.findAll();
     }
 
+    public Exercise getExerciseById(Long id) {
+        return exerciseRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Exercise not found with id: " + id));
+    }
+
     @Transactional
     public void deleteById(Long id) {
         Exercise exercise = exerciseRepository.findById(id)
@@ -52,10 +57,29 @@ public class ExerciseService {
 
     @Transactional
     public void createExercise(Exercise exercise, List<Long> muscleGroupIds) {
-        if (muscleGroupIds != null && !muscleGroupIds.isEmpty()) {
-            exercise.setMuscleGroups(new HashSet<>(muscleGroupRepository.findAllById(muscleGroupIds)));
-        }
+        exercise.setMuscleGroups(resolveMuscleGroups(muscleGroupIds));
 
         exerciseRepository.save(exercise);
+    }
+
+    @Transactional
+    public void updateExercise(Long id, Exercise exerciseData, List<Long> muscleGroupIds) {
+        Exercise exercise = exerciseRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Exercise not found with id: " + id));
+
+        exercise.setName(exerciseData.getName());
+        exercise.setDescription(exerciseData.getDescription());
+        exercise.setType(exerciseData.getType());
+        exercise.setMuscleGroups(resolveMuscleGroups(muscleGroupIds));
+
+        exerciseRepository.save(exercise);
+    }
+
+    private HashSet<MuscleGroup> resolveMuscleGroups(List<Long> muscleGroupIds) {
+        if (muscleGroupIds == null || muscleGroupIds.isEmpty()) {
+            return new HashSet<>();
+        }
+
+        return new HashSet<>(muscleGroupRepository.findAllById(muscleGroupIds));
     }
 }
