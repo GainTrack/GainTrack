@@ -17,12 +17,6 @@ body {
    2. Layout
    ========================= */
 
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 32px 20px;
-}
-
 .exercise-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -320,7 +314,7 @@ body {
     display: flex;
 }
 
-.modal {
+.modal-custom {
     width: 100%;
     max-width: 420px;
     padding: 24px;
@@ -329,12 +323,12 @@ body {
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.18);
 }
 
-.modal h3 {
+.modal-custom h3 {
     margin: 0 0 10px;
     font-size: 22px;
 }
 
-.modal p {
+.modal-custom p {
     margin: 0 0 22px;
     color: #475569;
     line-height: 1.5;
