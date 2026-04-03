@@ -295,6 +295,29 @@ body {
     background: #b91c1c;
 }
 
+.add-exercise-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #a78bfa, #8b5cf6);
+    color: #ffffff;
+    text-decoration: none;
+    border-radius: 12px;
+    padding: 0.7rem 1.15rem;
+    font-weight: 600;
+    font-size: 0.95rem;
+    border: none;
+    transition: 0.2s ease;
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.18);
+    width: fit-content;
+}
+
+.add-exercise-btn:hover {
+    color: #ffffff;
+    transform: translateY(-1px);
+    opacity: 0.96;
+}
+
 /* =========================
    7. Modal
    ========================= */
