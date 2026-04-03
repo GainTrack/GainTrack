@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Create Exercise</title>
+    <link rel="stylesheet" th:href="@{/css/exercises.css}">
+</head>
+<body>
+<div class="page-container">
+    <div class="content-card">
+        <div class="page-header">
+            <div>
+                <h1>Create Exercise</h1>
+                <p>Add a new exercise to the library.</p>
+            </div>
+            <a th:href="@{/exercises}" class="secondary-button">Back to exercises</a>
+        </div>
+
+        <form th:action="@{/exercises}" th:object="${exercise}" method="post" class="exercise-form">
+            <div class="form-group">
+                <label for="name">Name</label>
+                <input id="name" type="text" th:field="*{name}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="description">Description</label>
+                <textarea id="description" th:field="*{description}" rows="4"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="type">Type</label>
+                <select id="type" th:field="*{type}" required>
+                    <option value="">Select type</option>
+                    <option th:each="type : ${exerciseTypes}"
+                            th:value="${type}"
+                            th:text="${type}">
+                    </option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Muscle Groups</label>
+                <div class="checkbox-group">
+                    <div th:each="muscleGroup : ${muscleGroups}" class="checkbox-item">
+                        <label>
+                            <input type="checkbox"
+                                   name="muscleGroupIds"
+                                   th:value="${muscleGroup.id}">
+                            <span th:text="${muscleGroup.name}"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="primary-button">Create exercise</button>
+                <a th:href="@{/exercises}" class="secondary-button">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+</body>
+</html>

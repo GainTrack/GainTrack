@@ -1,5 +1,7 @@
 package hr.tvz.gaintrack.controller;
 
+import hr.tvz.gaintrack.model.Exercise;
+import hr.tvz.gaintrack.model.ExerciseType;
 import hr.tvz.gaintrack.service.ExerciseService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -7,6 +9,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import java.util.List;
 
 @Controller
 public class ExerciseController {
@@ -22,6 +26,21 @@ public class ExerciseController {
         model.addAttribute("exercises", exerciseService.search(search));
         model.addAttribute("search", search);
         return "exercises/list";
+    }
+
+    @GetMapping("/exercises/new")
+    public String showCreateForm(Model model) {
+        model.addAttribute("exercise", new Exercise());
+        model.addAttribute("exerciseTypes", ExerciseType.values());
+        model.addAttribute("muscleGroups", exerciseService.findAllMuscleGroups());
+        return "exercises/form";
+    }
+
+    @PostMapping("/exercises")
+    public String createExercise(@ModelAttribute Exercise exercise,
+                                 @RequestParam(required = false) List<Long> muscleGroupIds) {
+        exerciseService.createExercise(exercise, muscleGroupIds);
+        return "redirect:/exercises";
     }
 
     @PostMapping("/exercises/{id}/delete")
