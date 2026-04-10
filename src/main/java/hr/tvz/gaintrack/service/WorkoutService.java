@@ -40,6 +40,14 @@ public class WorkoutService {
     }
 
     @Transactional
+    public void deleteById(Long id) {
+        Workout workout = workoutRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Workout not found with id: " + id));
+
+        workoutRepository.delete(workout);
+    }
+
+    @Transactional
     public Workout createWorkout(WorkoutForm workoutForm) {
         String workoutName = workoutForm.getName() == null ? null : workoutForm.getName().trim();
 
