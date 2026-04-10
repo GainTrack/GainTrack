@@ -13,7 +13,10 @@
 <body>
 <div class="container py-4">
   <div class="mb-4">
-    <a th:href="@{/workouts}" class="btn btn-outline-secondary mb-3">Back to workouts</a>
+    <div class="d-flex gap-2 flex-wrap mb-3">
+      <a th:href="@{/workouts}" class="btn btn-outline-secondary">Back to workouts</a>
+      <a th:href="@{/workouts/new}" class="btn btn-primary">Create workout</a>
+    </div>
 
     <div class="card shadow-sm">
       <div class="card-body">

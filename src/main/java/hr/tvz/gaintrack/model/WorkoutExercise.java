@@ -2,8 +2,8 @@ package hr.tvz.gaintrack.model;
 
 import jakarta.persistence.*;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @Entity
 @Table(
@@ -30,12 +30,12 @@ public class WorkoutExercise {
 
     @OneToMany(mappedBy = "workoutExercise", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("setNumber ASC")
-    private List<WorkoutExerciseSet> sets = new ArrayList<>();
+    private Set<WorkoutExerciseSet> sets = new LinkedHashSet<>();
 
     public WorkoutExercise() {
     }
 
-    public WorkoutExercise(Long id, Workout workout, Exercise exercise, Integer position, List<WorkoutExerciseSet> sets) {
+    public WorkoutExercise(Long id, Workout workout, Exercise exercise, Integer position, Set<WorkoutExerciseSet> sets) {
         this.id = id;
         this.workout = workout;
         this.exercise = exercise;
@@ -59,7 +59,7 @@ public class WorkoutExercise {
         return position;
     }
 
-    public List<WorkoutExerciseSet> getSets() {
+    public Set<WorkoutExerciseSet> getSets() {
         return sets;
     }
 
@@ -79,7 +79,7 @@ public class WorkoutExercise {
         this.position = position;
     }
 
-    public void setSets(List<WorkoutExerciseSet> sets) {
+    public void setSets(Set<WorkoutExerciseSet> sets) {
         this.sets = sets;
     }
 }
