@@ -104,6 +104,21 @@
     color: #3f587f;
 }
 
+.create-workout-btn {
+    border-radius: 0.9rem;
+    padding: 0.56rem 0.9rem;
+    font-weight: 500;
+    font-size: 0.86rem;
+    border: 1px solid #d6c8ff;
+    color: #5a43c8;
+    background-color: #f3edff;
+}
+
+.create-workout-btn:hover {
+    background-color: #ece2ff;
+    color: #4631aa;
+}
+
 .info-box-soft {
     border-radius: 1rem;
     border: 1px solid #d7eef7;

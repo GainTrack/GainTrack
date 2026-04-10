@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Create workout</title>
+
+    <link rel="stylesheet" th:href="@{/css/workout-form.css}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
+          crossorigin="anonymous">
+</head>
+<body>
+<div class="workout-form-page">
+    <div class="page-header">
+        <div>
+            <h1>Create workout</h1>
+            <p>Build a workout by combining exercises and their working sets.</p>
+        </div>
+        <a th:href="@{/workouts}" class="secondary-button">Back to workouts</a>
+    </div>
+
+    <div class="content-card">
+        <form th:action="@{/workouts}" th:object="${workoutForm}" method="post" class="workout-form">
+            <div th:if="${#fields.hasGlobalErrors()}" class="alert alert-danger workout-form-alert">
+                <div th:each="err : ${#fields.globalErrors()}" th:text="${err}"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="name">Name</label>
+                <input id="name"
+                       type="text"
+                       th:field="*{name}"
+                       placeholder="e.g. Push Day"
+                       required>
+                <div th:if="${#fields.hasErrors('name')}"
+                     th:errors="*{name}"
+                     class="validation-error"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="description">Description</label>
+                <textarea id="description"
+                          th:field="*{description}"
+                          rows="4"
+                          placeholder="Write a short description for the workout..."></textarea>
+            </div>
+
+            <div class="builder-header">
+                <div>
+                    <h2>Exercises</h2>
+                    <p>Add one or more exercises and define the sets for each one.</p>
+                </div>
+                <button type="button" class="primary-button" onclick="addExerciseBlock()">Add exercise</button>
+            </div>
+
+            <div th:if="${#fields.hasErrors('exercises')}"
+                 th:errors="*{exercises}"
+                 class="validation-error"></div>
+
+            <div id="exerciseBlocks" class="exercise-blocks">
+                <div th:each="exerciseForm, stat : *{exercises}" class="exercise-card"
+                     th:with="exerciseIndex=${stat.index}">
+                    <div class="exercise-card-header">
+                        <div>
+                            <div class="exercise-card-title" th:text="'Exercise ' + ${exerciseIndex + 1}">Exercise 1</div>
+                            <div class="exercise-card-subtitle">Pick the exercise and add its sets.</div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label th:for="'exercise-' + ${exerciseIndex} + '-exerciseId'">Exercise</label>
+                        <select th:id="'exercise-' + ${exerciseIndex} + '-exerciseId'"
+                                th:field="*{exercises[__${exerciseIndex}__].exerciseId}"
+                                required>
+                            <option value="">Select an exercise</option>
+                            <option th:each="exercise : ${availableExercises}"
+                                    th:value="${exercise.id}"
+                                    th:text="${exercise.name}"></option>
+                        </select>
+                        <div th:if="${#fields.hasErrors('exercises[' + exerciseIndex + '].exerciseId')}"
+                             th:errors="*{exercises[__${exerciseIndex}__].exerciseId}"
+                             class="validation-error"></div>
+                    </div>
+
+                    <div class="sets-section">
+                        <div class="sets-header">
+                            <h3>Sets</h3>
+                            <button type="button"
+                                    class="secondary-button small-button"
+                                    th:attr="onclick='addSetRow(' + ${exerciseIndex} + ')'">
+                                Add set
+                            </button>
+                        </div>
+
+                        <div th:if="${#fields.hasErrors('exercises[' + exerciseIndex + '].sets')}"
+                             th:errors="*{exercises[__${exerciseIndex}__].sets}"
+                             class="validation-error"></div>
+
+                        <div class="set-rows" th:id="'exercise-' + ${exerciseIndex} + '-sets'">
+                            <div th:each="setForm, setStat : *{exercises[__${exerciseIndex}__].sets}"
+                                 class="set-row"
+                                 th:with="setIndex=${setStat.index}">
+                                <div class="set-field set-number-field">
+                                    <label th:for="'exercise-' + ${exerciseIndex} + '-set-' + ${setIndex} + '-number'">Set</label>
+                                    <input type="number"
+                                           th:id="'exercise-' + ${exerciseIndex} + '-set-' + ${setIndex} + '-number'"
+                                           th:field="*{exercises[__${exerciseIndex}__].sets[__${setIndex}__].setNumber}"
+                                           min="1"
+                                           readonly>
+                                </div>
+                                <div class="set-field">
+                                    <label th:for="'exercise-' + ${exerciseIndex} + '-set-' + ${setIndex} + '-reps'">Reps</label>
+                                    <input type="number"
+                                           th:id="'exercise-' + ${exerciseIndex} + '-set-' + ${setIndex} + '-reps'"
+                                           th:field="*{exercises[__${exerciseIndex}__].sets[__${setIndex}__].numberOfReps}"
+                                           min="1"
+                                           placeholder="e.g. 10"
+                                           required>
+                                    <div th:if="${#fields.hasErrors('exercises[' + exerciseIndex + '].sets[' + setIndex + '].numberOfReps')}"
+                                         th:errors="*{exercises[__${exerciseIndex}__].sets[__${setIndex}__].numberOfReps}"
+                                         class="validation-error"></div>
+                                </div>
+                                <div class="set-field">
+                                    <label th:for="'exercise-' + ${exerciseIndex} + '-set-' + ${setIndex} + '-weight'">Weight (kg)</label>
+                                    <input type="number"
+                                           th:id="'exercise-' + ${exerciseIndex} + '-set-' + ${setIndex} + '-weight'"
+                                           th:field="*{exercises[__${exerciseIndex}__].sets[__${setIndex}__].weight}"
+                                           min="0"
+                                           step="0.5"
+                                           placeholder="e.g. 60"
+                                           required>
+                                    <div th:if="${#fields.hasErrors('exercises[' + exerciseIndex + '].sets[' + setIndex + '].weight')}"
+                                         th:errors="*{exercises[__${exerciseIndex}__].sets[__${setIndex}__].weight}"
+                                         class="validation-error"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="primary-button">Create workout</button>
+                <a th:href="@{/workouts}" class="secondary-button">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<template id="exercise-options-template">
+    <option value="">Select an exercise</option>
+    <option th:each="exercise : ${availableExercises}"
+            th:value="${exercise.id}"
+            th:text="${exercise.name}"></option>
+</template>
+
+<template id="set-template">
+    <div class="set-row" data-set-index="__SET_INDEX__">
+        <div class="set-field set-number-field">
+            <label for="exercise-__EXERCISE_INDEX__-set-__SET_INDEX__-number">Set</label>
+            <input type="number"
+                   id="exercise-__EXERCISE_INDEX__-set-__SET_INDEX__-number"
+                   name="exercises[__EXERCISE_INDEX__].sets[__SET_INDEX__].setNumber"
+                   min="1"
+                   value="__SET_NUMBER__"
+                   readonly>
+        </div>
+        <div class="set-field">
+            <label for="exercise-__EXERCISE_INDEX__-set-__SET_INDEX__-reps">Reps</label>
+            <input type="number"
+                   id="exercise-__EXERCISE_INDEX__-set-__SET_INDEX__-reps"
+                   name="exercises[__EXERCISE_INDEX__].sets[__SET_INDEX__].numberOfReps"
+                   min="1"
+                   placeholder="e.g. 10"
+                   required>
+        </div>
+        <div class="set-field">
+            <label for="exercise-__EXERCISE_INDEX__-set-__SET_INDEX__-weight">Weight (kg)</label>
+            <input type="number"
+                   id="exercise-__EXERCISE_INDEX__-set-__SET_INDEX__-weight"
+                   name="exercises[__EXERCISE_INDEX__].sets[__SET_INDEX__].weight"
+                   min="0"
+                   step="0.5"
+                   placeholder="e.g. 60"
+                   required>
+        </div>
+    </div>
+</template>
+
+<template id="exercise-template">
+    <div class="exercise-card" data-exercise-index="__EXERCISE_INDEX__">
+        <div class="exercise-card-header">
+            <div>
+                <div class="exercise-card-title">Exercise __EXERCISE_NUMBER__</div>
+                <div class="exercise-card-subtitle">Pick the exercise and add its sets.</div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="exercise-__EXERCISE_INDEX__-exerciseId">Exercise</label>
+            <select id="exercise-__EXERCISE_INDEX__-exerciseId"
+                    name="exercises[__EXERCISE_INDEX__].exerciseId"
+                    required>
+                __EXERCISE_OPTIONS__
+            </select>
+        </div>
+
+        <div class="sets-section">
+            <div class="sets-header">
+                <h3>Sets</h3>
+                <button type="button" class="secondary-button small-button" onclick="addSetRow(__EXERCISE_INDEX__)">Add set</button>
+            </div>
+
+            <div class="set-rows" id="exercise-__EXERCISE_INDEX__-sets">
+                __SET_ROWS__
+            </div>
+        </div>
+    </div>
+</template>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+        crossorigin="anonymous"></script>
+<script th:src="@{/js/workout-form.js}"></script>
+</body>
+</html>
+
+
+
+

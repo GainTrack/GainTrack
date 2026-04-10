@@ -20,7 +20,10 @@
             <p class="workouts-subtitle">Manage and track your workouts</p>
         </div>
 
-        <a th:href="@{/}" class="btn back-home-btn">Back to home</a>
+        <div class="d-flex gap-2 flex-wrap">
+            <a th:href="@{/workouts/new}" class="btn create-workout-btn">Create workout</a>
+            <a th:href="@{/}" class="btn back-home-btn">Back to home</a>
+        </div>
     </div>
 
     <div th:if="${#lists.isEmpty(workouts)}" class="info-box-soft">
