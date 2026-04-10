@@ -47,3 +47,65 @@ FROM (
          JOIN exercise e ON e.name = mapping.exercise_name
          JOIN muscle_group m ON m.name = mapping.muscle_group_name
     ON CONFLICT (exercise_id, muscle_group_id) DO NOTHING;
+
+-- Pre-defined workouts
+INSERT INTO workout (name, description) VALUES
+                                            ('Push Day', 'Chest, shoulders and triceps workout.'),
+                                            ('Pull Day', 'Back and biceps workout.'),
+                                            ('Leg Day', 'Lower body workout focused on quads, glutes and hamstrings.')
+    ON CONFLICT (name) DO NOTHING;
+
+-- Workout - Exercise mappings
+INSERT INTO workout_exercise (workout_id, exercise_id, position)
+SELECT w.id, e.id, mapping.position
+FROM (
+         VALUES
+             ('Push Day', 'Bench Press', 1),
+             ('Push Day', 'Overhead Press', 2),
+
+             ('Pull Day', 'Barbell Row', 1),
+             ('Pull Day', 'Pull Up', 2),
+
+             ('Leg Day', 'Squat', 1),
+             ('Leg Day', 'Deadlift', 2)
+     ) AS mapping(workout_name, exercise_name, position)
+         JOIN workout w ON w.name = mapping.workout_name
+         JOIN exercise e ON e.name = mapping.exercise_name
+    ON CONFLICT (workout_id, exercise_id, position) DO NOTHING;
+
+-- Workout exercise sets
+INSERT INTO workout_exercise_set (workout_exercise_id, set_number, number_of_reps, weight)
+SELECT we.id, mapping.set_number, mapping.number_of_reps, mapping.weight
+FROM (
+         VALUES
+             ('Push Day', 'Bench Press', 1, 1, 8, 60),
+             ('Push Day', 'Bench Press', 1, 2, 8, 60),
+             ('Push Day', 'Bench Press', 1, 3, 6, 65),
+
+             ('Push Day', 'Overhead Press', 2, 1, 10, 30),
+             ('Push Day', 'Overhead Press', 2, 2, 10, 30),
+             ('Push Day', 'Overhead Press', 2, 3, 8, 35),
+
+             ('Pull Day', 'Barbell Row', 1, 1, 10, 50),
+             ('Pull Day', 'Barbell Row', 1, 2, 10, 50),
+             ('Pull Day', 'Barbell Row', 1, 3, 8, 55),
+
+             ('Pull Day', 'Pull Up', 2, 1, 8, 0),
+             ('Pull Day', 'Pull Up', 2, 2, 8, 0),
+             ('Pull Day', 'Pull Up', 2, 3, 6, 0),
+
+             ('Leg Day', 'Squat', 1, 1, 8, 80),
+             ('Leg Day', 'Squat', 1, 2, 8, 80),
+             ('Leg Day', 'Squat', 1, 3, 6, 90),
+
+             ('Leg Day', 'Deadlift', 2, 1, 8, 100),
+             ('Leg Day', 'Deadlift', 2, 2, 8, 100),
+             ('Leg Day', 'Deadlift', 2, 3, 6, 110)
+     ) AS mapping(workout_name, exercise_name, position, set_number, number_of_reps, weight)
+         JOIN workout w ON w.name = mapping.workout_name
+         JOIN exercise e ON e.name = mapping.exercise_name
+         JOIN workout_exercise we
+              ON we.workout_id = w.id
+                  AND we.exercise_id = e.id
+                  AND we.position = mapping.position
+    ON CONFLICT (workout_exercise_id, set_number) DO NOTHING;
