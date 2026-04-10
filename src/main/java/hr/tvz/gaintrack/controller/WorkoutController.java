@@ -61,6 +61,16 @@ public class WorkoutController {
         return "workouts/details";
     }
 
+    @PostMapping("/{id}/delete")
+    public String deleteWorkout(@PathVariable Long id) {
+        try {
+            workoutService.deleteById(id);
+        } catch (IllegalArgumentException ignored) {
+        }
+
+        return "redirect:/workouts";
+    }
+
     private WorkoutForm createEmptyWorkoutForm() {
         WorkoutForm workoutForm = new WorkoutForm();
 

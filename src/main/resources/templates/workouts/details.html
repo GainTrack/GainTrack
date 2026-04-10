@@ -16,6 +16,12 @@
     <div class="d-flex gap-2 flex-wrap mb-3">
       <a th:href="@{/workouts}" class="btn btn-outline-secondary">Back to workouts</a>
       <a th:href="@{/workouts/new}" class="btn btn-primary">Create workout</a>
+      <button type="button"
+              class="btn btn-outline-danger"
+              data-bs-toggle="modal"
+              data-bs-target="#deleteWorkoutModal">
+        Delete workout
+      </button>
     </div>
 
     <div class="card shadow-sm">
@@ -85,6 +91,33 @@
             </div>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade"
+     id="deleteWorkoutModal"
+     tabindex="-1"
+     aria-labelledby="deleteWorkoutModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title fs-5" id="deleteWorkoutModalLabel">Delete workout</h2>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p class="mb-0">
+          Are you sure you want to delete
+          <strong th:text="${workout.name}">Workout Name</strong>?
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+        <form th:action="@{/workouts/{id}/delete(id=${workout.id})}" method="post">
+          <button type="submit" class="btn btn-danger">Delete workout</button>
+        </form>
       </div>
     </div>
   </div>

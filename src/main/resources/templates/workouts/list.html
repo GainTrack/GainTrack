@@ -60,10 +60,48 @@
                         </div>
                     </div>
 
-                    <div class="mt-auto">
+                    <div class="mt-auto d-grid gap-2">
                         <a th:href="@{/workouts/{id}(id=${workout.id})}" class="btn view-details-btn w-100">
                             View details
                         </a>
+                        <button type="button"
+                                class="btn btn-outline-danger w-100"
+                                data-bs-toggle="modal"
+                                th:attr="data-bs-target='#deleteWorkoutModal-' + ${workout.id}">
+                            Delete workout
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade"
+                 th:id="'deleteWorkoutModal-' + ${workout.id}"
+                 tabindex="-1"
+                 th:attr="aria-labelledby='deleteWorkoutModalLabel-' + ${workout.id}"
+                 aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h2 class="modal-title fs-5"
+                                th:id="'deleteWorkoutModalLabel-' + ${workout.id}">
+                                Delete workout
+                            </h2>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p class="mb-0">
+                                Are you sure you want to delete
+                                <strong th:text="${workout.name}">Workout name</strong>?
+                            </p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                                Cancel
+                            </button>
+                            <form th:action="@{/workouts/{id}/delete(id=${workout.id})}" method="post">
+                                <button type="submit" class="btn btn-danger">Delete workout</button>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </div>
