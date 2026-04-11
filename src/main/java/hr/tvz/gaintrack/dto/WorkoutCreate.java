@@ -1,4 +1,4 @@
-package hr.tvz.gaintrack.model.form;
+package hr.tvz.gaintrack.dto;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.DecimalMin;
@@ -10,7 +10,7 @@ import jakarta.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-public class WorkoutForm {
+public class WorkoutCreate {
 
     @NotBlank(message = "Workout name is required.")
     private String name;
@@ -19,7 +19,7 @@ public class WorkoutForm {
 
     @NotEmpty(message = "Add at least one exercise.")
     @Valid
-    private List<WorkoutExerciseForm> exercises = new ArrayList<>();
+    private List<WorkoutExerciseCreate> exercises = new ArrayList<>();
 
     public String getName() {
         return name;
@@ -29,7 +29,7 @@ public class WorkoutForm {
         return description;
     }
 
-    public List<WorkoutExerciseForm> getExercises() {
+    public List<WorkoutExerciseCreate> getExercises() {
         return exercises;
     }
 
@@ -41,24 +41,24 @@ public class WorkoutForm {
         this.description = description;
     }
 
-    public void setExercises(List<WorkoutExerciseForm> exercises) {
+    public void setExercises(List<WorkoutExerciseCreate> exercises) {
         this.exercises = exercises;
     }
 
-    public static class WorkoutExerciseForm {
+    public static class WorkoutExerciseCreate {
 
         @NotNull(message = "Select an exercise.")
         private Long exerciseId;
 
         @NotEmpty(message = "Add at least one set.")
         @Valid
-        private List<WorkoutExerciseSetForm> sets = new ArrayList<>();
+        private List<WorkoutExerciseSetCreate> sets = new ArrayList<>();
 
         public Long getExerciseId() {
             return exerciseId;
         }
 
-        public List<WorkoutExerciseSetForm> getSets() {
+        public List<WorkoutExerciseSetCreate> getSets() {
             return sets;
         }
 
@@ -66,12 +66,12 @@ public class WorkoutForm {
             this.exerciseId = exerciseId;
         }
 
-        public void setSets(List<WorkoutExerciseSetForm> sets) {
+        public void setSets(List<WorkoutExerciseSetCreate> sets) {
             this.sets = sets;
         }
     }
 
-    public static class WorkoutExerciseSetForm {
+    public static class WorkoutExerciseSetCreate {
 
         @NotNull(message = "Set number is required.")
         @Min(value = 1, message = "Set number must be at least 1.")

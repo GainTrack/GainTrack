@@ -5,135 +5,122 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Exercises</title>
 
-    <link rel="stylesheet" th:href="@{/css/exercises.css}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
 </head>
-<body>
-<div class="container">
-
-    <div class="page-header">
+<body class="bg-body-tertiary">
+<div class="container py-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
         <div>
-            <h1>Exercises</h1>
-            <p>Overview of all available exercises</p>
+            <h1 class="h2 mb-1">Exercises</h1>
+            <p class="text-secondary mb-0">Overview of all available exercises</p>
         </div>
-
-        <a th:href="@{/exercises/new}" class="add-exercise-btn">
-            Add new
-        </a>
+        <div class="d-flex gap-2">
+            <a th:href="@{/}" class="btn btn-outline-secondary">Back to home</a>
+            <a th:href="@{/exercises/new}" class="btn btn-primary">Add new</a>
+        </div>
     </div>
 
-    <div class="search-section">
-        <form th:action="@{/exercises}" method="get" class="search-form">
-            <input
-                    type="text"
-                    name="search"
-                    class="search-input"
-                    placeholder="Search exercises by name or description..."
-                    th:value="${search}">
-            <button type="submit" class="search-btn">Search</button>
-
-            <a th:if="${search != null && !#strings.isEmpty(search)}"
-               th:href="@{/exercises}"
-               class="clear-search-btn">
-                Clear
-            </a>
-        </form>
+    <div class="card shadow-sm mb-3">
+        <div class="card-body">
+            <form th:action="@{/exercises}" method="get" class="row g-2 align-items-center">
+                <div class="col-12 col-md">
+                    <input type="text"
+                           name="search"
+                           class="form-control"
+                           placeholder="Search exercises by name or description..."
+                           th:value="${search}">
+                </div>
+                <div class="col-12 col-md-auto d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">Search</button>
+                    <a th:if="${search != null && !#strings.isEmpty(search)}"
+                       th:href="@{/exercises}"
+                       class="btn btn-outline-secondary">Clear</a>
+                </div>
+            </form>
+        </div>
     </div>
 
-    <p class="results-count" th:if="${search != null && !#strings.isEmpty(search)}">
+    <div class="mb-3 text-secondary" th:if="${search != null && !#strings.isEmpty(search)}">
         Results for "<strong th:text="${search}">bench</strong>":
         <strong th:text="${#lists.size(exercises)}">0</strong>
-    </p>
-
-    <p class="results-count" th:if="${search == null || #strings.isEmpty(search)}">
-        Total exercises: <strong th:text="${#lists.size(exercises)}">0</strong>
-    </p>
-
-    <div th:if="${!#lists.isEmpty(exercises)}" class="exercise-grid">
-        <div th:each="exercise : ${exercises}" class="exercise-card">
-
-            <div class="card-top">
-                <div class="exercise-icon"
-                     th:classappend="${
-                        exercise.type.name() == 'STRENGTH' ? ' type-strength' :
-                        (exercise.type.name() == 'CARDIO' ? ' type-cardio' : ' type-flexibility')
-                     }">
-                    🏋
-                </div>
-
-                <div class="card-actions">
-                    <a th:href="@{/exercises/{id}/edit(id=${exercise.id})}" class="action-btn edit-btn">
-                        Edit
-                    </a>
-                    <button type="button"
-                            class="action-btn delete-btn"
-                            th:attr="data-id=${exercise.id},data-name=${exercise.name}"
-                            onclick="openDeleteModal(this)">
-                        Delete
-                    </button>
-                </div>
-            </div>
-
-            <div class="type-badge"
-                 th:text="${exercise.type}"
-                 th:classappend="${
-                    exercise.type.name() == 'STRENGTH' ? ' badge-strength' :
-                    (exercise.type.name() == 'CARDIO' ? ' badge-cardio' : ' badge-flexibility')
-                 }">
-                STRENGTH
-            </div>
-
-            <h3 class="exercise-title" th:text="${exercise.name}">Bench Press</h3>
-
-            <p class="exercise-description"
-               th:text="${exercise.description != null && !#strings.isEmpty(exercise.description) ? exercise.description : 'No description available for this exercise.'}">
-                Exercise description
-            </p>
-
-            <div class="meta-block">
-                <div class="meta-label">Muscle groups:</div>
-
-                <div class="muscle-tags" th:if="${!#sets.isEmpty(exercise.muscleGroups)}">
-                    <span class="muscle-tag"
-                          th:each="muscleGroup : ${exercise.muscleGroups}"
-                          th:text="${muscleGroup.name}">
-                        Chest
-                    </span>
-                </div>
-
-                <div th:if="${#sets.isEmpty(exercise.muscleGroups)}" class="no-muscles">
-                    No muscle groups assigned
-                </div>
-            </div>
-
-        </div>
     </div>
 
-    <div th:if="${#lists.isEmpty(exercises)}" class="empty-state">
+    <div class="mb-3 text-secondary" th:if="${search == null || #strings.isEmpty(search)}">
+        Total exercises: <strong th:text="${#lists.size(exercises)}">0</strong>
+    </div>
+
+    <div class="alert alert-info" th:if="${#lists.isEmpty(exercises)}">
         No exercises found.
     </div>
 
-</div>
+    <div class="row g-3" th:if="${!#lists.isEmpty(exercises)}">
+        <div class="col-12 col-lg-6" th:each="exercise : ${exercises}">
+            <div class="card shadow-sm h-100">
+                <div class="card-body d-flex flex-column gap-3">
+                    <div class="d-flex justify-content-between align-items-start gap-2">
+                        <span class="badge"
+                              th:text="${exercise.type}"
+                              th:classappend="${exercise.type.name() == 'STRENGTH' ? ' text-bg-primary' : (exercise.type.name() == 'CARDIO' ? ' text-bg-success' : ' text-bg-warning')}">
+                            STRENGTH
+                        </span>
+                        <div class="btn-group btn-group-sm">
+                            <a th:href="@{/exercises/{id}/edit(id=${exercise.id})}" class="btn btn-outline-primary">Edit</a>
+                            <button type="button"
+                                    class="btn btn-outline-danger"
+                                    th:attr="data-id=${exercise.id},data-name=${exercise.name}"
+                                    onclick="openDeleteModal(this)">
+                                Delete
+                            </button>
+                        </div>
+                    </div>
 
-<div id="deleteModal" class="modal-overlay">
-    <div class="modal-custom">
-        <h3>Delete confirmation</h3>
-        <p id="deleteModalText">Are you sure you want to delete this exercise?</p>
+                    <h2 class="h5 mb-0" th:text="${exercise.name}">Bench Press</h2>
 
-        <form id="deleteForm" method="post">
-            <div class="modal-actions">
-                <button type="button" class="modal-btn cancel-btn" onclick="closeDeleteModal()">
-                    Cancel
-                </button>
-                <button type="submit" class="modal-btn confirm-delete-btn">
-                    Delete
-                </button>
+                    <p class="text-secondary mb-0"
+                       th:text="${exercise.description != null && !#strings.isEmpty(exercise.description) ? exercise.description : 'No description available for this exercise.'}">
+                        Exercise description
+                    </p>
+
+                    <div class="mt-auto">
+                        <div class="small fw-semibold text-secondary mb-2">Muscle groups</div>
+                        <div class="d-flex flex-wrap gap-2" th:if="${!#sets.isEmpty(exercise.muscleGroups)}">
+                            <span class="badge rounded-pill text-bg-light border"
+                                  th:each="muscleGroup : ${exercise.muscleGroups}"
+                                  th:text="${muscleGroup.name}">
+                                Chest
+                            </span>
+                        </div>
+                        <div class="text-secondary small" th:if="${#sets.isEmpty(exercise.muscleGroups)}">
+                            No muscle groups assigned
+                        </div>
+                    </div>
+                </div>
             </div>
-        </form>
+        </div>
     </div>
 </div>
 
-<script th:src="@{/js/exercises.js}"></script>
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete confirmation</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p id="deleteModalText" class="mb-0">Are you sure you want to delete this exercise?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form id="deleteForm" method="post">
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+<script th:src="@{/js/exercises.js}"></script>
 </body>
 </html>
