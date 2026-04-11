@@ -14,6 +14,8 @@
 
 </head>
 <body class="bg-body-tertiary">
+<div th:replace="~{fragments/navbar :: appNavbar}"></div>
+
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
         <div>
@@ -23,7 +25,6 @@
 
         <div class="d-flex gap-2 flex-wrap">
             <a th:href="@{/workouts/new}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Create workout</a>
-            <a th:href="@{/}" class="btn btn-outline-secondary"><i class="bi bi-house-door me-1"></i>Back to home</a>
         </div>
     </div>
 

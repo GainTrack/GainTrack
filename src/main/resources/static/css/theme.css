@@ -27,3 +27,35 @@
     letter-spacing: 0.01em;
 }
 
+.app-navbar {
+    border-bottom: 1px solid #e8e9f2;
+}
+
+.app-brand {
+    font-weight: 700;
+    letter-spacing: 0.01em;
+}
+
+.app-brand-icon {
+    width: 2.2rem;
+    height: 2.2rem;
+    object-fit: contain;
+}
+
+.app-nav-link {
+    font-weight: 500;
+    border-radius: 0.65rem;
+    padding: 0.45rem 0.8rem !important;
+    color: #5b6171 !important;
+}
+
+.app-nav-link:hover {
+    background-color: #f2f4ff;
+    color: #4f46e5 !important;
+}
+
+.app-nav-link.active {
+    background-color: #ede9fe;
+    color: #4f46e5 !important;
+}
+
