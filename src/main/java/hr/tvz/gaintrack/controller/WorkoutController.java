@@ -25,7 +25,7 @@ public class WorkoutController {
     @GetMapping
     public String showWorkoutList(Model model) {
         model.addAttribute("workouts", workoutService.getAllWorkouts());
-        return "workouts/list";
+        return "workouts/index";
     }
 
     @GetMapping("/new")

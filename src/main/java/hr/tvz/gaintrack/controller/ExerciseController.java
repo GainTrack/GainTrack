@@ -27,7 +27,7 @@ public class ExerciseController {
     public String getExercises(@RequestParam(required = false) String search, Model model) {
         model.addAttribute("exercises", exerciseService.search(search));
         model.addAttribute("search", search);
-        return "exercises/list";
+        return "exercises/index";
     }
 
     @GetMapping("/exercises/new")
