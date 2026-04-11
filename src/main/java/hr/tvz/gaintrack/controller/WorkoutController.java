@@ -1,7 +1,7 @@
 package hr.tvz.gaintrack.controller;
 
+import hr.tvz.gaintrack.dto.WorkoutCreate;
 import hr.tvz.gaintrack.model.Workout;
-import hr.tvz.gaintrack.model.form.WorkoutForm;
 import hr.tvz.gaintrack.service.WorkoutService;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
@@ -30,27 +30,27 @@ public class WorkoutController {
 
     @GetMapping("/new")
     public String showCreateForm(Model model) {
-        model.addAttribute("workoutForm", createEmptyWorkoutForm());
+        model.addAttribute("workoutCreate", createEmptyWorkoutCreate());
         model.addAttribute("availableExercises", workoutService.findAllExercises());
-        return "workouts/form";
+        return "workouts/create";
     }
 
     @PostMapping
-    public String createWorkout(@Valid @ModelAttribute("workoutForm") WorkoutForm workoutForm,
+    public String createWorkout(@Valid @ModelAttribute("workoutCreate") WorkoutCreate workoutCreate,
                                 BindingResult bindingResult,
                                 Model model) {
         if (bindingResult.hasErrors()) {
             model.addAttribute("availableExercises", workoutService.findAllExercises());
-            return "workouts/form";
+            return "workouts/create";
         }
 
         try {
-            Workout workout = workoutService.createWorkout(workoutForm);
+            Workout workout = workoutService.createWorkout(workoutCreate);
             return "redirect:/workouts/" + workout.getId();
         } catch (IllegalArgumentException exception) {
             bindingResult.reject("workout.create.failed", exception.getMessage());
             model.addAttribute("availableExercises", workoutService.findAllExercises());
-            return "workouts/form";
+            return "workouts/create";
         }
     }
 
@@ -61,15 +61,15 @@ public class WorkoutController {
         return "workouts/details";
     }
 
-    private WorkoutForm createEmptyWorkoutForm() {
-        WorkoutForm workoutForm = new WorkoutForm();
+    private WorkoutCreate createEmptyWorkoutCreate() {
+        WorkoutCreate workoutCreate = new WorkoutCreate();
 
-        WorkoutForm.WorkoutExerciseForm workoutExerciseForm = new WorkoutForm.WorkoutExerciseForm();
-        WorkoutForm.WorkoutExerciseSetForm workoutExerciseSetForm = new WorkoutForm.WorkoutExerciseSetForm();
-        workoutExerciseSetForm.setSetNumber(1);
-        workoutExerciseForm.getSets().add(workoutExerciseSetForm);
-        workoutForm.getExercises().add(workoutExerciseForm);
+        WorkoutCreate.WorkoutExerciseCreate workoutExerciseCreate = new WorkoutCreate.WorkoutExerciseCreate();
+        WorkoutCreate.WorkoutExerciseSetCreate workoutExerciseSetCreate = new WorkoutCreate.WorkoutExerciseSetCreate();
+        workoutExerciseSetCreate.setSetNumber(1);
+        workoutExerciseCreate.getSets().add(workoutExerciseSetCreate);
+        workoutCreate.getExercises().add(workoutExerciseCreate);
 
-        return workoutForm;
+        return workoutCreate;
     }
 }

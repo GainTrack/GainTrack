@@ -1,10 +1,10 @@
 package hr.tvz.gaintrack.service;
 
 import hr.tvz.gaintrack.model.Exercise;
+import hr.tvz.gaintrack.dto.WorkoutCreate;
 import hr.tvz.gaintrack.model.Workout;
 import hr.tvz.gaintrack.model.WorkoutExercise;
 import hr.tvz.gaintrack.model.WorkoutExerciseSet;
-import hr.tvz.gaintrack.model.form.WorkoutForm;
 import hr.tvz.gaintrack.repository.ExerciseRepository;
 import hr.tvz.gaintrack.repository.WorkoutRepository;
 import org.springframework.stereotype.Service;
@@ -40,8 +40,8 @@ public class WorkoutService {
     }
 
     @Transactional
-    public Workout createWorkout(WorkoutForm workoutForm) {
-        String workoutName = workoutForm.getName() == null ? null : workoutForm.getName().trim();
+    public Workout createWorkout(WorkoutCreate workoutCreate) {
+        String workoutName = workoutCreate.getName() == null ? null : workoutCreate.getName().trim();
 
         if (workoutName == null || workoutName.isEmpty()) {
             throw new IllegalArgumentException("Workout name is required.");
@@ -53,28 +53,28 @@ public class WorkoutService {
 
         Map<Long, Exercise> exercisesById = new LinkedHashMap<>();
         for (Exercise exercise : exerciseRepository.findAllById(
-                workoutForm.getExercises().stream()
-                        .map(WorkoutForm.WorkoutExerciseForm::getExerciseId)
+                workoutCreate.getExercises().stream()
+                        .map(WorkoutCreate.WorkoutExerciseCreate::getExerciseId)
                         .toList())) {
             exercisesById.put(exercise.getId(), exercise);
         }
 
         Workout workout = new Workout();
         workout.setName(workoutName);
-        workout.setDescription(workoutForm.getDescription());
-        workout.setWorkoutExercises(buildWorkoutExercises(workout, workoutForm, exercisesById));
+        workout.setDescription(workoutCreate.getDescription());
+        workout.setWorkoutExercises(buildWorkoutExercises(workout, workoutCreate, exercisesById));
 
         return workoutRepository.save(workout);
     }
 
     private Set<WorkoutExercise> buildWorkoutExercises(Workout workout,
-                                                      WorkoutForm workoutForm,
+                                                      WorkoutCreate workoutCreate,
                                                       Map<Long, Exercise> exercisesById) {
         Set<WorkoutExercise> workoutExercises = new LinkedHashSet<>();
 
-        for (int exerciseIndex = 0; exerciseIndex < workoutForm.getExercises().size(); exerciseIndex++) {
-            WorkoutForm.WorkoutExerciseForm workoutExerciseForm = workoutForm.getExercises().get(exerciseIndex);
-            Exercise exercise = exercisesById.get(workoutExerciseForm.getExerciseId());
+        for (int exerciseIndex = 0; exerciseIndex < workoutCreate.getExercises().size(); exerciseIndex++) {
+            WorkoutCreate.WorkoutExerciseCreate workoutExerciseCreate = workoutCreate.getExercises().get(exerciseIndex);
+            Exercise exercise = exercisesById.get(workoutExerciseCreate.getExerciseId());
 
             if (exercise == null) {
                 throw new IllegalArgumentException("Selected exercise could not be found.");
@@ -84,7 +84,7 @@ public class WorkoutService {
             workoutExercise.setWorkout(workout);
             workoutExercise.setExercise(exercise);
             workoutExercise.setPosition(exerciseIndex + 1);
-            workoutExercise.setSets(buildWorkoutExerciseSets(workoutExercise, workoutExerciseForm));
+            workoutExercise.setSets(buildWorkoutExerciseSets(workoutExercise, workoutExerciseCreate));
             workoutExercises.add(workoutExercise);
         }
 
@@ -92,15 +92,15 @@ public class WorkoutService {
     }
 
     private Set<WorkoutExerciseSet> buildWorkoutExerciseSets(WorkoutExercise workoutExercise,
-                                                             WorkoutForm.WorkoutExerciseForm workoutExerciseForm) {
+                                                             WorkoutCreate.WorkoutExerciseCreate workoutExerciseCreate) {
         Set<WorkoutExerciseSet> sets = new LinkedHashSet<>();
 
-        for (WorkoutForm.WorkoutExerciseSetForm setForm : workoutExerciseForm.getSets()) {
+        for (WorkoutCreate.WorkoutExerciseSetCreate setCreate : workoutExerciseCreate.getSets()) {
             WorkoutExerciseSet workoutExerciseSet = new WorkoutExerciseSet();
             workoutExerciseSet.setWorkoutExercise(workoutExercise);
-            workoutExerciseSet.setSetNumber(setForm.getSetNumber());
-            workoutExerciseSet.setNumberOfReps(setForm.getNumberOfReps());
-            workoutExerciseSet.setWeight(setForm.getWeight());
+            workoutExerciseSet.setSetNumber(setCreate.getSetNumber());
+            workoutExerciseSet.setNumberOfReps(setCreate.getNumberOfReps());
+            workoutExerciseSet.setWeight(setCreate.getWeight());
             sets.add(workoutExerciseSet);
         }
 
