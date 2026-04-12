@@ -47,6 +47,8 @@ public class WorkoutCreate {
 
     public static class WorkoutExerciseCreate {
 
+        private boolean itemForDelete;
+
         @NotNull(message = "Select an exercise.")
         private Long exerciseId;
 
@@ -58,6 +60,10 @@ public class WorkoutCreate {
             return exerciseId;
         }
 
+        public boolean isItemForDelete() {
+            return itemForDelete;
+        }
+
         public List<WorkoutExerciseSetCreate> getSets() {
             return sets;
         }
@@ -66,12 +72,18 @@ public class WorkoutCreate {
             this.exerciseId = exerciseId;
         }
 
+        public void setItemForDelete(boolean itemForDelete) {
+            this.itemForDelete = itemForDelete;
+        }
+
         public void setSets(List<WorkoutExerciseSetCreate> sets) {
             this.sets = sets;
         }
     }
 
     public static class WorkoutExerciseSetCreate {
+
+        private boolean itemForDelete;
 
         @NotNull(message = "Set number is required.")
         @Min(value = 1, message = "Set number must be at least 1.")
@@ -89,6 +101,10 @@ public class WorkoutCreate {
             return setNumber;
         }
 
+        public boolean isItemForDelete() {
+            return itemForDelete;
+        }
+
         public Integer getNumberOfReps() {
             return numberOfReps;
         }
@@ -99,6 +115,10 @@ public class WorkoutCreate {
 
         public void setSetNumber(Integer setNumber) {
             this.setNumber = setNumber;
+        }
+
+        public void setItemForDelete(boolean itemForDelete) {
+            this.itemForDelete = itemForDelete;
         }
 
         public void setNumberOfReps(Integer numberOfReps) {

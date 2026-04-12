@@ -59,3 +59,53 @@
     color: #4f46e5 !important;
 }
 
+.workout-exercise-card {
+    border-color: #e7e9f5 !important;
+    border-radius: 0.85rem;
+    background-color: #fcfcff;
+}
+
+.workout-create-card {
+    border-color: #e7e9f5;
+}
+
+.workout-set-row {
+    background-color: #ffffff;
+    border-color: #eceef8 !important;
+}
+
+.workout-set-row .form-label {
+    margin-bottom: 0.4rem;
+}
+
+.workout-remove-btn {
+    min-height: 2rem;
+    padding: 0.25rem 0.45rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.55rem;
+}
+
+.workout-remove-btn-wide {
+    white-space: nowrap;
+}
+
+.workout-exercise-card-error {
+    border-color: #dc3545 !important;
+    background-color: #fff8f8;
+}
+
+.workout-inline-error {
+    border: 1px solid #f3b7bd;
+    background-color: #fff0f1;
+    color: #b02a37;
+    border-radius: 0.55rem;
+    font-size: 0.85rem;
+    padding: 0.45rem 0.65rem;
+}
+
+.workout-set-row-error {
+    border-color: #dc3545 !important;
+}
+
