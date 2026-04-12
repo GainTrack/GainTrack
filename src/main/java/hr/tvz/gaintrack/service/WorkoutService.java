@@ -15,6 +15,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class WorkoutService {
@@ -51,10 +52,25 @@ public class WorkoutService {
             throw new IllegalArgumentException("A workout with this name already exists.");
         }
 
+        List<WorkoutCreate.WorkoutExerciseCreate> activeExercises = workoutCreate.getExercises().stream()
+                .filter(exercise -> !exercise.isItemForDelete())
+                .collect(Collectors.toList());
+
+        if (activeExercises.isEmpty()) {
+            throw new IllegalArgumentException("Add at least one exercise.");
+        }
+
+        boolean hasExerciseWithoutSets = activeExercises.stream()
+                .anyMatch(exercise -> exercise.getSets().stream().noneMatch(set -> !set.isItemForDelete()));
+        if (hasExerciseWithoutSets) {
+            throw new IllegalArgumentException("Each exercise must contain at least one set.");
+        }
+
         Map<Long, Exercise> exercisesById = new LinkedHashMap<>();
         for (Exercise exercise : exerciseRepository.findAllById(
-                workoutCreate.getExercises().stream()
+                activeExercises.stream()
                         .map(WorkoutCreate.WorkoutExerciseCreate::getExerciseId)
+                        .filter(id -> id != null)
                         .toList())) {
             exercisesById.put(exercise.getId(), exercise);
         }
@@ -62,18 +78,18 @@ public class WorkoutService {
         Workout workout = new Workout();
         workout.setName(workoutName);
         workout.setDescription(workoutCreate.getDescription());
-        workout.setWorkoutExercises(buildWorkoutExercises(workout, workoutCreate, exercisesById));
+        workout.setWorkoutExercises(buildWorkoutExercises(workout, activeExercises, exercisesById));
 
         return workoutRepository.save(workout);
     }
 
     private Set<WorkoutExercise> buildWorkoutExercises(Workout workout,
-                                                      WorkoutCreate workoutCreate,
-                                                      Map<Long, Exercise> exercisesById) {
+                                                       List<WorkoutCreate.WorkoutExerciseCreate> exercises,
+                                                       Map<Long, Exercise> exercisesById) {
         Set<WorkoutExercise> workoutExercises = new LinkedHashSet<>();
 
-        for (int exerciseIndex = 0; exerciseIndex < workoutCreate.getExercises().size(); exerciseIndex++) {
-            WorkoutCreate.WorkoutExerciseCreate workoutExerciseCreate = workoutCreate.getExercises().get(exerciseIndex);
+        for (int exerciseIndex = 0; exerciseIndex < exercises.size(); exerciseIndex++) {
+            WorkoutCreate.WorkoutExerciseCreate workoutExerciseCreate = exercises.get(exerciseIndex);
             Exercise exercise = exercisesById.get(workoutExerciseCreate.getExerciseId());
 
             if (exercise == null) {
@@ -95,10 +111,15 @@ public class WorkoutService {
                                                              WorkoutCreate.WorkoutExerciseCreate workoutExerciseCreate) {
         Set<WorkoutExerciseSet> sets = new LinkedHashSet<>();
 
-        for (WorkoutCreate.WorkoutExerciseSetCreate setCreate : workoutExerciseCreate.getSets()) {
+        List<WorkoutCreate.WorkoutExerciseSetCreate> activeSets = workoutExerciseCreate.getSets().stream()
+                .filter(set -> !set.isItemForDelete())
+                .collect(Collectors.toList());
+
+        for (int setIndex = 0; setIndex < activeSets.size(); setIndex++) {
+            WorkoutCreate.WorkoutExerciseSetCreate setCreate = activeSets.get(setIndex);
             WorkoutExerciseSet workoutExerciseSet = new WorkoutExerciseSet();
             workoutExerciseSet.setWorkoutExercise(workoutExercise);
-            workoutExerciseSet.setSetNumber(setCreate.getSetNumber());
+            workoutExerciseSet.setSetNumber(setIndex + 1);
             workoutExerciseSet.setNumberOfReps(setCreate.getNumberOfReps());
             workoutExerciseSet.setWeight(setCreate.getWeight());
             sets.add(workoutExerciseSet);

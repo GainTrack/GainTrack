@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="createWorkoutExerciseRow(exerciseIndex, exerciseForm, availableExercises)"
+     class="exercise-card card border workout-exercise-card"
+     th:attr="data-exercise-index=${exerciseIndex}">
+    <div class="card-body d-flex flex-column gap-3 p-3 p-md-4">
+        <div class="d-flex justify-content-between align-items-md-center align-items-start flex-wrap gap-2 gap-md-3">
+            <div>
+                <div class="h6 mb-1 exercise-title" th:text="'Exercise ' + (${exerciseIndex} + 1)">Exercise 1</div>
+                <div class="text-secondary small">Pick the exercise and add its sets.</div>
+            </div>
+            <button type="button"
+                    class="btn btn-outline-danger btn-sm d-inline-flex align-items-center gap-2 workout-remove-btn workout-remove-btn-wide"
+                    data-action="remove-exercise"
+                    title="Remove exercise"
+                    aria-label="Remove exercise">
+                <i class="bi bi-trash3"></i>
+                <span>Delete exercise</span>
+            </button>
+        </div>
+
+        <input type="hidden"
+               class="item-for-delete"
+               th:name="'exercises[' + ${exerciseIndex} + '].itemForDelete'"
+               value="false">
+
+        <div class="workout-inline-error d-none" data-role="exercise-error"></div>
+
+        <div>
+            <label class="form-label" th:for="'exercise-' + ${exerciseIndex} + '-exerciseId'">Exercise</label>
+            <select th:id="'exercise-' + ${exerciseIndex} + '-exerciseId'"
+                    class="form-select"
+                    th:name="'exercises[' + ${exerciseIndex} + '].exerciseId'"
+                    required>
+                <option value="">Select an exercise</option>
+                <option th:each="exercise : ${availableExercises}"
+                        th:value="${exercise.id}"
+                        th:text="${exercise.name}"
+                        th:selected="${exerciseForm != null && exerciseForm.exerciseId != null && exerciseForm.exerciseId.equals(exercise.id)}"></option>
+            </select>
+        </div>
+
+        <div class="d-flex flex-column gap-3">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <h3 class="h6 mb-0">Sets</h3>
+                <button type="button" class="btn btn-outline-primary btn-sm" data-action="add-set">Add set</button>
+            </div>
+
+            <div class="set-rows d-flex flex-column gap-2" th:id="'exercise-' + ${exerciseIndex} + '-sets'">
+                <th:block th:if="${exerciseForm != null && !#lists.isEmpty(exerciseForm.sets)}">
+                    <th:block th:each="setForm, setStat : ${exerciseForm.sets}">
+                        <th:block th:replace="~{workouts/fragments/create-workout-rows :: createWorkoutSetRow(exerciseIndex=${exerciseIndex}, setIndex=${setStat.index}, setForm=${setForm})}"></th:block>
+                    </th:block>
+                </th:block>
+                <th:block th:if="${exerciseForm == null || #lists.isEmpty(exerciseForm.sets)}">
+                    <th:block th:replace="~{workouts/fragments/create-workout-rows :: createWorkoutSetRow(exerciseIndex=${exerciseIndex}, setIndex=0, setForm=${null})}"></th:block>
+                </th:block>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:fragment="createWorkoutSetRow(exerciseIndex, setIndex, setForm)"
+     class="set-row row g-2 g-md-3 align-items-end border rounded-3 p-2 p-md-3 mx-0 workout-set-row"
+     th:attr="data-set-index=${setIndex}">
+    <input type="hidden"
+           class="item-for-delete"
+           th:name="'exercises[' + ${exerciseIndex} + '].sets[' + ${setIndex} + '].itemForDelete'"
+           value="false">
+
+    <div class="col-12 col-sm-3 col-md-2">
+        <label class="form-label" th:for="'exercise-' + ${exerciseIndex} + '-set-' + ${setIndex} + '-number'">Set</label>
+        <input type="number"
+               class="form-control set-number"
+               th:id="'exercise-' + ${exerciseIndex} + '-set-' + ${setIndex} + '-number'"
+               th:name="'exercises[' + ${exerciseIndex} + '].sets[' + ${setIndex} + '].setNumber'"
+               min="1"
+               th:value="${setForm != null && setForm.setNumber != null ? setForm.setNumber : setIndex + 1}"
+               readonly>
+    </div>
+    <div class="col-12 col-sm-4 col-md-4">
+        <label class="form-label" th:for="'exercise-' + ${exerciseIndex} + '-set-' + ${setIndex} + '-reps'">Reps</label>
+        <input type="number"
+               class="form-control"
+               th:id="'exercise-' + ${exerciseIndex} + '-set-' + ${setIndex} + '-reps'"
+               th:name="'exercises[' + ${exerciseIndex} + '].sets[' + ${setIndex} + '].numberOfReps'"
+               min="1"
+               placeholder="e.g. 10"
+               th:value="${setForm != null ? setForm.numberOfReps : null}"
+               required>
+    </div>
+    <div class="col-12 col-sm-5 col-md-4">
+        <label class="form-label" th:for="'exercise-' + ${exerciseIndex} + '-set-' + ${setIndex} + '-weight'">Weight (kg)</label>
+        <input type="number"
+               class="form-control"
+               th:id="'exercise-' + ${exerciseIndex} + '-set-' + ${setIndex} + '-weight'"
+               th:name="'exercises[' + ${exerciseIndex} + '].sets[' + ${setIndex} + '].weight'"
+               min="0"
+               step="0.5"
+               placeholder="e.g. 60"
+               th:value="${setForm != null ? setForm.weight : null}"
+               required>
+    </div>
+    <div class="col-12 col-md-2 d-flex justify-content-md-end">
+        <button type="button"
+                class="btn btn-outline-danger btn-sm d-inline-flex align-items-center gap-2 workout-remove-btn workout-remove-btn-wide"
+                data-action="remove-set"
+                title="Remove set"
+                aria-label="Remove set">
+            <i class="bi bi-trash3"></i>
+            <span>Delete set</span>
+        </button>
+    </div>
+</div>
+</body>
+</html>
+
+
