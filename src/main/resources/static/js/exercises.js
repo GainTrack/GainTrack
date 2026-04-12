@@ -1,3 +1,5 @@
+let deleteModalInstance;
+
 function openDeleteModal(button) {
     const id = button.getAttribute('data-id');
     const name = button.getAttribute('data-name');
@@ -9,16 +11,9 @@ function openDeleteModal(button) {
     form.action = '/exercises/' + id + '/delete';
     text.textContent = 'Are you sure you want to delete the exercise "' + name + '"?';
 
-    modal.classList.add('show');
-}
-
-function closeDeleteModal() {
-    document.getElementById('deleteModal').classList.remove('show');
-}
-
-window.addEventListener('click', function (event) {
-    const modal = document.getElementById('deleteModal');
-    if (event.target === modal) {
-        closeDeleteModal();
+    if (window.bootstrap) {
+        deleteModalInstance = bootstrap.Modal.getOrCreateInstance(modal);
+        deleteModalInstance.show();
     }
-});
+}
+

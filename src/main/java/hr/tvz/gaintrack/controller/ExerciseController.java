@@ -27,7 +27,7 @@ public class ExerciseController {
     public String getExercises(@RequestParam(required = false) String search, Model model) {
         model.addAttribute("exercises", exerciseService.search(search));
         model.addAttribute("search", search);
-        return "exercises/list";
+        return "exercises/index";
     }
 
     @GetMapping("/exercises/new")
@@ -35,7 +35,7 @@ public class ExerciseController {
         model.addAttribute("exercise", new Exercise());
         model.addAttribute("exerciseTypes", ExerciseType.values());
         model.addAttribute("muscleGroups", exerciseService.findAllMuscleGroups());
-        return "exercises/form";
+        return "exercises/create";
     }
 
     @PostMapping("/exercises")
@@ -55,7 +55,7 @@ public class ExerciseController {
                 "selectedMuscleGroupIds",
                 exercise.getMuscleGroups().stream().map(MuscleGroup::getId).collect(Collectors.toSet())
         );
-        return "exercises/editForm";
+        return "exercises/edit";
     }
 
     @PostMapping("/exercises/{id}/edit")

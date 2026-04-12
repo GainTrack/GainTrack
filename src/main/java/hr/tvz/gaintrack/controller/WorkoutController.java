@@ -1,7 +1,7 @@
 package hr.tvz.gaintrack.controller;
 
+import hr.tvz.gaintrack.dto.WorkoutCreate;
 import hr.tvz.gaintrack.model.Workout;
-import hr.tvz.gaintrack.model.form.WorkoutForm;
 import hr.tvz.gaintrack.service.WorkoutService;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
@@ -25,32 +25,32 @@ public class WorkoutController {
     @GetMapping
     public String showWorkoutList(Model model) {
         model.addAttribute("workouts", workoutService.getAllWorkouts());
-        return "workouts/list";
+        return "workouts/index";
     }
 
     @GetMapping("/new")
     public String showCreateForm(Model model) {
-        model.addAttribute("workoutForm", createEmptyWorkoutForm());
+        model.addAttribute("workoutCreate", createEmptyWorkoutCreate());
         model.addAttribute("availableExercises", workoutService.findAllExercises());
-        return "workouts/form";
+        return "workouts/create";
     }
 
     @PostMapping
-    public String createWorkout(@Valid @ModelAttribute("workoutForm") WorkoutForm workoutForm,
+    public String createWorkout(@Valid @ModelAttribute("workoutCreate") WorkoutCreate workoutCreate,
                                 BindingResult bindingResult,
                                 Model model) {
         if (bindingResult.hasErrors()) {
             model.addAttribute("availableExercises", workoutService.findAllExercises());
-            return "workouts/form";
+            return "workouts/create";
         }
 
         try {
-            Workout workout = workoutService.createWorkout(workoutForm);
+            Workout workout = workoutService.createWorkout(workoutCreate);
             return "redirect:/workouts/" + workout.getId();
         } catch (IllegalArgumentException exception) {
             bindingResult.reject("workout.create.failed", exception.getMessage());
             model.addAttribute("availableExercises", workoutService.findAllExercises());
-            return "workouts/form";
+            return "workouts/create";
         }
     }
 
@@ -61,25 +61,15 @@ public class WorkoutController {
         return "workouts/details";
     }
 
-    @PostMapping("/{id}/delete")
-    public String deleteWorkout(@PathVariable Long id) {
-        try {
-            workoutService.deleteById(id);
-        } catch (IllegalArgumentException ignored) {
-        }
+    private WorkoutCreate createEmptyWorkoutCreate() {
+        WorkoutCreate workoutCreate = new WorkoutCreate();
 
-        return "redirect:/workouts";
-    }
+        WorkoutCreate.WorkoutExerciseCreate workoutExerciseCreate = new WorkoutCreate.WorkoutExerciseCreate();
+        WorkoutCreate.WorkoutExerciseSetCreate workoutExerciseSetCreate = new WorkoutCreate.WorkoutExerciseSetCreate();
+        workoutExerciseSetCreate.setSetNumber(1);
+        workoutExerciseCreate.getSets().add(workoutExerciseSetCreate);
+        workoutCreate.getExercises().add(workoutExerciseCreate);
 
-    private WorkoutForm createEmptyWorkoutForm() {
-        WorkoutForm workoutForm = new WorkoutForm();
-
-        WorkoutForm.WorkoutExerciseForm workoutExerciseForm = new WorkoutForm.WorkoutExerciseForm();
-        WorkoutForm.WorkoutExerciseSetForm workoutExerciseSetForm = new WorkoutForm.WorkoutExerciseSetForm();
-        workoutExerciseSetForm.setSetNumber(1);
-        workoutExerciseForm.getSets().add(workoutExerciseSetForm);
-        workoutForm.getExercises().add(workoutExerciseForm);
-
-        return workoutForm;
+        return workoutCreate;
     }
 }
