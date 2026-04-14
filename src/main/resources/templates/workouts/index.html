@@ -67,10 +67,13 @@
                         </div>
                     </div>
 
-                    <div class="mt-auto">
-                        <a th:href="@{/workouts/{id}(id=${workout.id})}" class="btn btn-outline-primary w-100">
+                    <div class="mt-auto d-flex gap-2">
+                        <a th:href="@{/workouts/{id}(id=${workout.id})}" class="btn btn-outline-primary flex-fill">
                             View details
                         </a>
+                        <form th:action="@{/workouts/{id}/delete(id=${workout.id})}" method="post" class="flex-fill">
+                            <button type="submit" class="btn btn-outline-danger w-100">Delete</button>
+                        </form>
                     </div>
                 </div>
             </div>
