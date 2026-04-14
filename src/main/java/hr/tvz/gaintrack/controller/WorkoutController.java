@@ -62,6 +62,12 @@ public class WorkoutController {
         return "workouts/details";
     }
 
+    @PostMapping("/{id}/delete")
+    public String deleteWorkout(@PathVariable Long id) {
+        workoutService.deleteById(id);
+        return "redirect:/workouts";
+    }
+
     @GetMapping("/form/exercise-row")
     public String createExerciseRow(@RequestParam int exerciseIndex, Model model) {
         model.addAttribute("exerciseIndex", exerciseIndex);
