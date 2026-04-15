@@ -136,6 +136,13 @@ async function addExerciseBlock() {
         const html = await fetchPartial('/workouts/form/exercise-row?exerciseIndex=' + exerciseIndex);
         container.insertAdjacentHTML('beforeend', html);
         reindexExerciseCards();
+
+        const exerciseCards = container.querySelectorAll('.exercise-card');
+        const newExerciseCard = exerciseCards[exerciseCards.length - 1];
+
+        if (newExerciseCard) {
+            applyExerciseTypeToCard(newExerciseCard);
+        }
     } catch (error) {
         console.error(error);
     }
@@ -156,6 +163,7 @@ async function addSetRow(exerciseIndex) {
         const exerciseCard = setsContainer.closest('.exercise-card');
         if (exerciseCard) {
             reindexSetRows(exerciseCard, exerciseIndex);
+            applyExerciseTypeToCard(exerciseCard);
         }
     } catch (error) {
         console.error(error);
@@ -200,6 +208,75 @@ function removeSet(button) {
     reindexSetRows(exerciseCard, exerciseIndex);
 }
 
+function getSelectedExerciseType(exerciseCard) {
+    const select = exerciseCard.querySelector('select');
+    if (!select) {
+        return null;
+    }
+
+    const selectedOption = select.options[select.selectedIndex];
+    if (!selectedOption) {
+        return null;
+    }
+
+    return selectedOption.getAttribute('data-exercise-type');
+}
+
+function applySetFieldsByExerciseType(setRow, exerciseType) {
+    const strengthFields = setRow.querySelectorAll('.set-field-strength');
+    const durationField = setRow.querySelector('.set-field-duration');
+
+    const repsInput = setRow.querySelector('.reps-input');
+    const weightInput = setRow.querySelector('.weight-input');
+    const durationInput = setRow.querySelector('.duration-input');
+
+    const isStrength = exerciseType === 'STRENGTH';
+    const isTimed = exerciseType === 'CARDIO' || exerciseType === 'FLEXIBILITY';
+
+    strengthFields.forEach(function (field) {
+        field.classList.toggle('d-none', !isStrength);
+    });
+
+    if (durationField) {
+        durationField.classList.toggle('d-none', !isTimed);
+    }
+
+    if (repsInput) {
+        repsInput.required = isStrength;
+        if (!isStrength) {
+            repsInput.value = '';
+        }
+    }
+
+    if (weightInput) {
+        weightInput.required = isStrength;
+        if (!isStrength) {
+            weightInput.value = '';
+        }
+    }
+
+    if (durationInput) {
+        durationInput.required = isTimed;
+        if (!isTimed) {
+            durationInput.value = '';
+        }
+    }
+}
+
+function applyExerciseTypeToCard(exerciseCard) {
+    const exerciseType = getSelectedExerciseType(exerciseCard);
+
+    if (!exerciseType) {
+        return;
+    }
+
+    exerciseCard.dataset.exerciseType = exerciseType;
+
+    exerciseCard.querySelectorAll('.set-row').forEach(function (setRow) {
+        applySetFieldsByExerciseType(setRow, exerciseType);
+    });
+}
+
 window.addExerciseBlock = addExerciseBlock;
 window.addSetRow = addSetRow;
 
@@ -210,6 +287,10 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     reindexExerciseCards();
+
+    container.querySelectorAll('.exercise-card').forEach(function (exerciseCard) {
+        applyExerciseTypeToCard(exerciseCard);
+    });
 
     document.addEventListener('click', function (event) {
         const target = event.target;
@@ -242,6 +323,22 @@ document.addEventListener('DOMContentLoaded', function () {
         if (action === 'remove-set') {
             removeSet(actionButton);
         }
+    });
+
+    document.addEventListener('change', function (event) {
+        const target = event.target;
+
+        if (!(target instanceof HTMLSelectElement)) {
+            return;
+        }
+
+        const exerciseCard = target.closest('.exercise-card');
+        if (!exerciseCard) {
+            return;
+        }
+
+        clearExerciseError(exerciseCard);
+        applyExerciseTypeToCard(exerciseCard);
     });
 
     if (container.querySelectorAll('.exercise-card').length === 0) {

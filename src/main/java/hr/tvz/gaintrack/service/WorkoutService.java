@@ -1,7 +1,8 @@
 package hr.tvz.gaintrack.service;
 
-import hr.tvz.gaintrack.model.Exercise;
 import hr.tvz.gaintrack.dto.WorkoutCreate;
+import hr.tvz.gaintrack.model.Exercise;
+import hr.tvz.gaintrack.model.ExerciseType;
 import hr.tvz.gaintrack.model.Workout;
 import hr.tvz.gaintrack.model.WorkoutExercise;
 import hr.tvz.gaintrack.model.WorkoutExerciseSet;
@@ -19,6 +20,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class WorkoutService {
+
     private final WorkoutRepository workoutRepository;
     private final ExerciseRepository exerciseRepository;
 
@@ -70,6 +72,7 @@ public class WorkoutService {
 
         boolean hasExerciseWithoutSets = activeExercises.stream()
                 .anyMatch(exercise -> exercise.getSets().stream().noneMatch(set -> !set.isItemForDelete()));
+
         if (hasExerciseWithoutSets) {
             throw new IllegalArgumentException("Each exercise must contain at least one set.");
         }
@@ -91,9 +94,11 @@ public class WorkoutService {
         return workoutRepository.save(workout);
     }
 
-    private Set<WorkoutExercise> buildWorkoutExercises(Workout workout,
-                                                       List<WorkoutCreate.WorkoutExerciseCreate> exercises,
-                                                       Map<Long, Exercise> exercisesById) {
+    private Set<WorkoutExercise> buildWorkoutExercises(
+            Workout workout,
+            List<WorkoutCreate.WorkoutExerciseCreate> exercises,
+            Map<Long, Exercise> exercisesById
+    ) {
         Set<WorkoutExercise> workoutExercises = new LinkedHashSet<>();
 
         for (int exerciseIndex = 0; exerciseIndex < exercises.size(); exerciseIndex++) {
@@ -108,15 +113,19 @@ public class WorkoutService {
             workoutExercise.setWorkout(workout);
             workoutExercise.setExercise(exercise);
             workoutExercise.setPosition(exerciseIndex + 1);
-            workoutExercise.setSets(buildWorkoutExerciseSets(workoutExercise, workoutExerciseCreate));
+            workoutExercise.setSets(buildWorkoutExerciseSets(workoutExercise, workoutExerciseCreate, exercise));
+
             workoutExercises.add(workoutExercise);
         }
 
         return workoutExercises;
     }
 
-    private Set<WorkoutExerciseSet> buildWorkoutExerciseSets(WorkoutExercise workoutExercise,
-                                                             WorkoutCreate.WorkoutExerciseCreate workoutExerciseCreate) {
+    private Set<WorkoutExerciseSet> buildWorkoutExerciseSets(
+            WorkoutExercise workoutExercise,
+            WorkoutCreate.WorkoutExerciseCreate workoutExerciseCreate,
+            Exercise exercise
+    ) {
         Set<WorkoutExerciseSet> sets = new LinkedHashSet<>();
 
         List<WorkoutCreate.WorkoutExerciseSetCreate> activeSets = workoutExerciseCreate.getSets().stream()
@@ -125,14 +134,58 @@ public class WorkoutService {
 
         for (int setIndex = 0; setIndex < activeSets.size(); setIndex++) {
             WorkoutCreate.WorkoutExerciseSetCreate setCreate = activeSets.get(setIndex);
+
+            validateSetByExerciseType(setCreate, exercise);
+
             WorkoutExerciseSet workoutExerciseSet = new WorkoutExerciseSet();
             workoutExerciseSet.setWorkoutExercise(workoutExercise);
             workoutExerciseSet.setSetNumber(setIndex + 1);
-            workoutExerciseSet.setNumberOfReps(setCreate.getNumberOfReps());
-            workoutExerciseSet.setWeight(setCreate.getWeight());
+
+            applySetValuesByExerciseType(workoutExerciseSet, setCreate, exercise);
+
             sets.add(workoutExerciseSet);
         }
 
         return sets;
+    }
+
+    private void validateSetByExerciseType(
+            WorkoutCreate.WorkoutExerciseSetCreate setCreate,
+            Exercise exercise
+    ) {
+        if (exercise.getType() == ExerciseType.STRENGTH) {
+            if (setCreate.getNumberOfReps() == null) {
+                throw new IllegalArgumentException("Reps are required for strength exercises.");
+            }
+
+            if (setCreate.getWeight() == null) {
+                throw new IllegalArgumentException("Weight is required for strength exercises.");
+            }
+        } else if (exercise.getType() == ExerciseType.CARDIO
+                || exercise.getType() == ExerciseType.FLEXIBILITY) {
+
+            if (setCreate.getDurationMinutes() == null) {
+                throw new IllegalArgumentException(
+                        "Duration in minutes is required for cardio and flexibility exercises."
+                );
+            }
+        }
+    }
+
+    private void applySetValuesByExerciseType(
+            WorkoutExerciseSet workoutExerciseSet,
+            WorkoutCreate.WorkoutExerciseSetCreate setCreate,
+            Exercise exercise
+    ) {
+        if (exercise.getType() == ExerciseType.STRENGTH) {
+            workoutExerciseSet.setNumberOfReps(setCreate.getNumberOfReps());
+            workoutExerciseSet.setWeight(setCreate.getWeight());
+            workoutExerciseSet.setDurationMinutes(null);
+        } else if (exercise.getType() == ExerciseType.CARDIO
+                || exercise.getType() == ExerciseType.FLEXIBILITY) {
+            workoutExerciseSet.setNumberOfReps(null);
+            workoutExerciseSet.setWeight(null);
+            workoutExerciseSet.setDurationMinutes(setCreate.getDurationMinutes());
+        }
     }
 }

@@ -89,13 +89,14 @@ public class WorkoutCreate {
         @Min(value = 1, message = "Set number must be at least 1.")
         private Integer setNumber;
 
-        @NotNull(message = "Reps are required.")
         @Min(value = 1, message = "Reps must be at least 1.")
         private Integer numberOfReps;
 
-        @NotNull(message = "Weight is required.")
         @DecimalMin(value = "0.0", message = "Weight cannot be negative.")
         private Double weight;
+
+        @Min(value = 1, message = "Duration must be at least 1 minute.")
+        private Integer durationMinutes;
 
         public Integer getSetNumber() {
             return setNumber;
@@ -113,6 +114,10 @@ public class WorkoutCreate {
             return weight;
         }
 
+        public Integer getDurationMinutes() {
+            return durationMinutes;
+        }
+
         public void setSetNumber(Integer setNumber) {
             this.setNumber = setNumber;
         }
@@ -128,7 +133,9 @@ public class WorkoutCreate {
         public void setWeight(Double weight) {
             this.weight = weight;
         }
+
+        public void setDurationMinutes(Integer durationMinutes) {
+            this.durationMinutes = durationMinutes;
+        }
     }
 }
-
-

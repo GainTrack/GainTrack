@@ -58,8 +58,7 @@
         </h2>
 
         <div class="accordion-collapse collapse"
-             th:id="'collapse-' + ${stat.index}"
-             data-bs-parent="#workoutExercisesAccordion">
+             th:id="'collapse-' + ${stat.index}">
           <div class="accordion-body">
             <p class="mb-3 text-muted"
                th:text="${workoutExercise.exercise.description != null and !#strings.isEmpty(workoutExercise.exercise.description) ? workoutExercise.exercise.description : 'No exercise description available.'}">
@@ -71,7 +70,8 @@
             </div>
 
             <div th:unless="${workoutExercise.sets.isEmpty()}">
-              <div class="table-responsive">
+
+              <div class="table-responsive" th:if="${workoutExercise.exercise.type.name() == 'STRENGTH'}">
                 <table class="table table-striped align-middle mb-0">
                   <thead>
                   <tr>
@@ -81,7 +81,7 @@
                   </tr>
                   </thead>
                   <tbody>
-                  <tr th:each="exerciseSet, setStat : ${workoutExercise.sets}">
+                  <tr th:each="exerciseSet : ${workoutExercise.sets}">
                     <td th:text="${exerciseSet.setNumber}">1</td>
                     <td th:text="${exerciseSet.numberOfReps}">10</td>
                     <td th:text="${exerciseSet.weight}">50</td>
@@ -89,6 +89,25 @@
                   </tbody>
                 </table>
               </div>
+
+              <div class="table-responsive"
+                   th:if="${workoutExercise.exercise.type.name() == 'CARDIO' || workoutExercise.exercise.type.name() == 'FLEXIBILITY'}">
+                <table class="table table-striped align-middle mb-0">
+                  <thead>
+                  <tr>
+                    <th scope="col">Set</th>
+                    <th scope="col">Duration (min)</th>
+                  </tr>
+                  </thead>
+                  <tbody>
+                  <tr th:each="exerciseSet : ${workoutExercise.sets}">
+                    <td th:text="${exerciseSet.setNumber}">1</td>
+                    <td th:text="${exerciseSet.durationMinutes}">20</td>
+                  </tr>
+                  </tbody>
+                </table>
+              </div>
+
             </div>
           </div>
         </div>
