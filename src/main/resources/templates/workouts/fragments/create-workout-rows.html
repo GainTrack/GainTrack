@@ -37,7 +37,9 @@
                 <option th:each="exercise : ${availableExercises}"
                         th:value="${exercise.id}"
                         th:text="${exercise.name}"
-                        th:selected="${exerciseForm != null && exerciseForm.exerciseId != null && exerciseForm.exerciseId.equals(exercise.id)}"></option>
+                        th:attr="data-exercise-type=${exercise.type}"
+                        th:selected="${exerciseForm != null && exerciseForm.exerciseId != null && exerciseForm.exerciseId.equals(exercise.id)}">
+                </option>
             </select>
         </div>
 
@@ -70,7 +72,8 @@
            value="false">
 
     <div class="col-12 col-sm-3 col-md-2">
-        <label class="form-label" th:for="'exercise-' + ${exerciseIndex} + '-set-' + ${setIndex} + '-number'">Set</label>
+        <label class="form-label"
+               th:for="'exercise-' + ${exerciseIndex} + '-set-' + ${setIndex} + '-number'">Set</label>
         <input type="number"
                class="form-control set-number"
                th:id="'exercise-' + ${exerciseIndex} + '-set-' + ${setIndex} + '-number'"
@@ -79,29 +82,44 @@
                th:value="${setForm != null && setForm.setNumber != null ? setForm.setNumber : setIndex + 1}"
                readonly>
     </div>
-    <div class="col-12 col-sm-4 col-md-4">
-        <label class="form-label" th:for="'exercise-' + ${exerciseIndex} + '-set-' + ${setIndex} + '-reps'">Reps</label>
+
+    <div class="col-12 col-sm-4 col-md-3 set-field-strength">
+        <label class="form-label"
+               th:for="'exercise-' + ${exerciseIndex} + '-set-' + ${setIndex} + '-reps'">Reps</label>
         <input type="number"
-               class="form-control"
+               class="form-control reps-input"
                th:id="'exercise-' + ${exerciseIndex} + '-set-' + ${setIndex} + '-reps'"
                th:name="'exercises[' + ${exerciseIndex} + '].sets[' + ${setIndex} + '].numberOfReps'"
                min="1"
                placeholder="e.g. 10"
-               th:value="${setForm != null ? setForm.numberOfReps : null}"
-               required>
+               th:value="${setForm != null ? setForm.numberOfReps : null}">
     </div>
-    <div class="col-12 col-sm-5 col-md-4">
-        <label class="form-label" th:for="'exercise-' + ${exerciseIndex} + '-set-' + ${setIndex} + '-weight'">Weight (kg)</label>
+
+    <div class="col-12 col-sm-5 col-md-3 set-field-strength">
+        <label class="form-label"
+               th:for="'exercise-' + ${exerciseIndex} + '-set-' + ${setIndex} + '-weight'">Weight (kg)</label>
         <input type="number"
-               class="form-control"
+               class="form-control weight-input"
                th:id="'exercise-' + ${exerciseIndex} + '-set-' + ${setIndex} + '-weight'"
                th:name="'exercises[' + ${exerciseIndex} + '].sets[' + ${setIndex} + '].weight'"
                min="0"
                step="0.5"
                placeholder="e.g. 60"
-               th:value="${setForm != null ? setForm.weight : null}"
-               required>
+               th:value="${setForm != null ? setForm.weight : null}">
     </div>
+
+    <div class="col-12 col-sm-9 col-md-4 set-field-duration d-none">
+        <label class="form-label"
+               th:for="'exercise-' + ${exerciseIndex} + '-set-' + ${setIndex} + '-duration'">Duration (min)</label>
+        <input type="number"
+               class="form-control duration-input"
+               th:id="'exercise-' + ${exerciseIndex} + '-set-' + ${setIndex} + '-duration'"
+               th:name="'exercises[' + ${exerciseIndex} + '].sets[' + ${setIndex} + '].durationMinutes'"
+               min="1"
+               placeholder="e.g. 20"
+               th:value="${setForm != null ? setForm.durationMinutes : null}">
+    </div>
+
     <div class="col-12 col-md-2 d-flex justify-content-md-end">
         <button type="button"
                 class="btn btn-outline-danger btn-sm d-inline-flex align-items-center gap-2 workout-remove-btn workout-remove-btn-wide"
