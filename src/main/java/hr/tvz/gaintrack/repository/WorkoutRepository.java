@@ -16,4 +16,6 @@ public interface WorkoutRepository extends JpaRepository<Workout, Long> {
 	Optional<Workout> findWithDetailsById(Long id);
 
 	boolean existsByNameIgnoreCase(String name);
+
+	boolean existsByNameIgnoreCaseAndIdNot(String name, Long id);
 }

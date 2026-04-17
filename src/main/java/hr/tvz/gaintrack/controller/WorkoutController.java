@@ -62,6 +62,33 @@ public class WorkoutController {
         return "workouts/details";
     }
 
+    @GetMapping("/{id}/edit")
+    public String showEditForm(@PathVariable Long id, Model model) {
+        model.addAttribute("workoutCreate", workoutService.getWorkoutFormById(id));
+        populateWorkoutFormModel(model, id);
+        return "workouts/edit";
+    }
+
+    @PostMapping("/{id}/edit")
+    public String editWorkout(@PathVariable Long id,
+                              @Valid @ModelAttribute("workoutCreate") WorkoutCreate workoutCreate,
+                              BindingResult bindingResult,
+                              Model model) {
+        if (bindingResult.hasErrors()) {
+            populateWorkoutFormModel(model, id);
+            return "workouts/edit";
+        }
+
+        try {
+            Workout workout = workoutService.updateWorkout(id, workoutCreate);
+            return "redirect:/workouts/" + workout.getId();
+        } catch (IllegalArgumentException exception) {
+            bindingResult.reject("workout.update.failed", exception.getMessage());
+            populateWorkoutFormModel(model, id);
+            return "workouts/edit";
+        }
+    }
+
     @PostMapping("/{id}/delete")
     public String deleteWorkout(@PathVariable Long id) {
         workoutService.deleteById(id);
@@ -96,5 +123,10 @@ public class WorkoutController {
         workoutCreate.getExercises().add(workoutExerciseCreate);
 
         return workoutCreate;
+    }
+
+    private void populateWorkoutFormModel(Model model, Long workoutId) {
+        model.addAttribute("workoutId", workoutId);
+        model.addAttribute("availableExercises", workoutService.findAllExercises());
     }
 }

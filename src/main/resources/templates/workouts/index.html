@@ -71,6 +71,9 @@
                         <a th:href="@{/workouts/{id}(id=${workout.id})}" class="btn btn-outline-primary flex-fill">
                             View details
                         </a>
+                        <a th:href="@{/workouts/{id}/edit(id=${workout.id})}" class="btn btn-outline-secondary flex-fill">
+                            Edit
+                        </a>
                         <form th:action="@{/workouts/{id}/delete(id=${workout.id})}" method="post" class="flex-fill">
                             <button type="submit" class="btn btn-outline-danger w-100">Delete</button>
                         </form>
