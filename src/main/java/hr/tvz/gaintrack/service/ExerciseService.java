@@ -4,6 +4,7 @@ import hr.tvz.gaintrack.model.Exercise;
 import hr.tvz.gaintrack.model.MuscleGroup;
 import hr.tvz.gaintrack.repository.ExerciseRepository;
 import hr.tvz.gaintrack.repository.MuscleGroupRepository;
+import hr.tvz.gaintrack.repository.WorkoutExerciseRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,10 +16,16 @@ public class ExerciseService {
 
     private final ExerciseRepository exerciseRepository;
     private final MuscleGroupRepository muscleGroupRepository;
+    private final WorkoutExerciseRepository workoutExerciseRepository;
 
-    public ExerciseService(ExerciseRepository exerciseRepository, MuscleGroupRepository muscleGroupRepository) {
+    public ExerciseService(
+            ExerciseRepository exerciseRepository,
+            MuscleGroupRepository muscleGroupRepository,
+            WorkoutExerciseRepository workoutExerciseRepository
+    ) {
         this.exerciseRepository = exerciseRepository;
         this.muscleGroupRepository = muscleGroupRepository;
+        this.workoutExerciseRepository = workoutExerciseRepository;
     }
 
     public List<Exercise> findAll() {
@@ -35,9 +42,11 @@ public class ExerciseService {
         Exercise exercise = exerciseRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Exercise not found with id: " + id));
 
-        exercise.getMuscleGroups().clear();
-        exerciseRepository.save(exercise);
+        if (workoutExerciseRepository.existsByExerciseId(id)) {
+            throw new IllegalStateException("Exercise cannot be deleted because it is used in a workout.");
+        }
 
+        exercise.getMuscleGroups().clear();
         exerciseRepository.delete(exercise);
     }
 

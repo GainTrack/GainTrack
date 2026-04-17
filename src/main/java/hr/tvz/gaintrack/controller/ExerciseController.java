@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -67,8 +68,14 @@ public class ExerciseController {
     }
 
     @PostMapping("/exercises/{id}/delete")
-    public String deleteExercise(@PathVariable Long id) {
-        exerciseService.deleteById(id);
+    public String deleteExercise(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        try {
+            exerciseService.deleteById(id);
+            redirectAttributes.addFlashAttribute("successMessage", "Exercise deleted.");
+        } catch (IllegalArgumentException | IllegalStateException exception) {
+            redirectAttributes.addFlashAttribute("errorMessage", exception.getMessage());
+        }
+
         return "redirect:/exercises";
     }
 }
