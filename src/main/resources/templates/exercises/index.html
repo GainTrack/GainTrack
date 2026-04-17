@@ -23,6 +23,9 @@
         </div>
     </div>
 
+    <div th:if="${successMessage}" class="alert alert-success" role="alert" th:text="${successMessage}"></div>
+    <div th:if="${errorMessage}" class="alert alert-danger" role="alert" th:text="${errorMessage}"></div>
+
     <div class="card shadow-sm mb-3">
         <div class="card-body">
             <form th:action="@{/exercises}" method="get" class="row g-2 align-items-center">
