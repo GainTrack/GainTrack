@@ -2,6 +2,7 @@ package hr.tvz.gaintrack.model;
 
 import jakarta.persistence.*;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 @Entity
@@ -39,7 +40,8 @@ public class Exercise {
                     )
             }
     )
-    private Set<MuscleGroup> muscleGroups = new HashSet<>();
+    @OrderBy("name ASC")
+    private Set<MuscleGroup> muscleGroups = new LinkedHashSet<>();
 
     public Exercise() {}
 

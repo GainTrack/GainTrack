@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 @Service
@@ -75,11 +76,11 @@ public class ExerciseService {
         exerciseRepository.save(exercise);
     }
 
-    private HashSet<MuscleGroup> resolveMuscleGroups(List<Long> muscleGroupIds) {
+    private LinkedHashSet<MuscleGroup> resolveMuscleGroups(List<Long> muscleGroupIds) {
         if (muscleGroupIds == null || muscleGroupIds.isEmpty()) {
-            return new HashSet<>();
+            return new LinkedHashSet<>();
         }
 
-        return new HashSet<>(muscleGroupRepository.findAllById(muscleGroupIds));
+        return new LinkedHashSet<>(muscleGroupRepository.findAllById(muscleGroupIds));
     }
 }
