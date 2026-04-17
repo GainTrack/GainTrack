@@ -11,6 +11,7 @@ import hr.tvz.gaintrack.repository.WorkoutRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -42,6 +43,21 @@ public class WorkoutService {
         return exerciseRepository.findAllByOrderByNameAsc();
     }
 
+    public WorkoutCreate getWorkoutFormById(Long id) {
+        Workout workout = workoutRepository.findWithDetailsById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Workout not found with id: " + id));
+
+        WorkoutCreate workoutCreate = new WorkoutCreate();
+        workoutCreate.setName(workout.getName());
+        workoutCreate.setDescription(workout.getDescription());
+        workoutCreate.setExercises(workout.getWorkoutExercises().stream()
+                .sorted(Comparator.comparing(WorkoutExercise::getPosition))
+                .map(this::toWorkoutExerciseCreate)
+                .collect(Collectors.toList()));
+
+        return workoutCreate;
+    }
+
     @Transactional
     public void deleteById(Long id) {
         Workout workout = workoutRepository.findById(id)
@@ -52,20 +68,87 @@ public class WorkoutService {
 
     @Transactional
     public Workout createWorkout(WorkoutCreate workoutCreate) {
-        String workoutName = workoutCreate.getName() == null ? null : workoutCreate.getName().trim();
-
-        if (workoutName == null || workoutName.isEmpty()) {
-            throw new IllegalArgumentException("Workout name is required.");
-        }
+        String workoutName = requireWorkoutName(workoutCreate);
 
         if (workoutRepository.existsByNameIgnoreCase(workoutName)) {
             throw new IllegalArgumentException("A workout with this name already exists.");
         }
 
-        List<WorkoutCreate.WorkoutExerciseCreate> activeExercises = workoutCreate.getExercises().stream()
+        List<WorkoutCreate.WorkoutExerciseCreate> activeExercises = getActiveExercises(workoutCreate);
+        validateActiveExercises(activeExercises);
+        Map<Long, Exercise> exercisesById = findExercisesById(activeExercises);
+
+        Workout workout = new Workout();
+        workout.setName(workoutName);
+        workout.setDescription(workoutCreate.getDescription());
+        workout.setWorkoutExercises(buildWorkoutExercises(workout, activeExercises, exercisesById));
+
+        return workoutRepository.save(workout);
+    }
+
+    @Transactional
+    public Workout updateWorkout(Long id, WorkoutCreate workoutCreate) {
+        Workout workout = workoutRepository.findWithDetailsById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Workout not found with id: " + id));
+
+        String workoutName = requireWorkoutName(workoutCreate);
+
+        if (workoutRepository.existsByNameIgnoreCaseAndIdNot(workoutName, id)) {
+            throw new IllegalArgumentException("A workout with this name already exists.");
+        }
+
+        List<WorkoutCreate.WorkoutExerciseCreate> activeExercises = getActiveExercises(workoutCreate);
+        validateActiveExercises(activeExercises);
+        Map<Long, Exercise> exercisesById = findExercisesById(activeExercises);
+        Set<WorkoutExercise> rebuiltWorkoutExercises = buildWorkoutExercises(workout, activeExercises, exercisesById);
+
+        workout.setName(workoutName);
+        workout.setDescription(workoutCreate.getDescription());
+        workout.getWorkoutExercises().clear();
+        workoutRepository.flush();
+        workout.getWorkoutExercises().addAll(rebuiltWorkoutExercises);
+
+        return workoutRepository.save(workout);
+    }
+
+    private WorkoutCreate.WorkoutExerciseCreate toWorkoutExerciseCreate(WorkoutExercise workoutExercise) {
+        WorkoutCreate.WorkoutExerciseCreate exerciseCreate = new WorkoutCreate.WorkoutExerciseCreate();
+        exerciseCreate.setExerciseId(workoutExercise.getExercise().getId());
+        exerciseCreate.setSets(workoutExercise.getSets().stream()
+                .sorted(Comparator.comparing(WorkoutExerciseSet::getSetNumber))
+                .map(this::toWorkoutExerciseSetCreate)
+                .collect(Collectors.toList()));
+
+        return exerciseCreate;
+    }
+
+    private WorkoutCreate.WorkoutExerciseSetCreate toWorkoutExerciseSetCreate(WorkoutExerciseSet workoutExerciseSet) {
+        WorkoutCreate.WorkoutExerciseSetCreate setCreate = new WorkoutCreate.WorkoutExerciseSetCreate();
+        setCreate.setSetNumber(workoutExerciseSet.getSetNumber());
+        setCreate.setNumberOfReps(workoutExerciseSet.getNumberOfReps());
+        setCreate.setWeight(workoutExerciseSet.getWeight());
+        setCreate.setDurationMinutes(workoutExerciseSet.getDurationMinutes());
+
+        return setCreate;
+    }
+
+    private String requireWorkoutName(WorkoutCreate workoutCreate) {
+        String workoutName = workoutCreate.getName().trim();
+
+        if (workoutName.isEmpty()) {
+            throw new IllegalArgumentException("Workout name is required.");
+        }
+
+        return workoutName;
+    }
+
+    private List<WorkoutCreate.WorkoutExerciseCreate> getActiveExercises(WorkoutCreate workoutCreate) {
+        return workoutCreate.getExercises().stream()
                 .filter(exercise -> !exercise.isItemForDelete())
                 .collect(Collectors.toList());
+    }
 
+    private void validateActiveExercises(List<WorkoutCreate.WorkoutExerciseCreate> activeExercises) {
         if (activeExercises.isEmpty()) {
             throw new IllegalArgumentException("Add at least one exercise.");
         }
@@ -76,22 +159,19 @@ public class WorkoutService {
         if (hasExerciseWithoutSets) {
             throw new IllegalArgumentException("Each exercise must contain at least one set.");
         }
+    }
 
+    private Map<Long, Exercise> findExercisesById(List<WorkoutCreate.WorkoutExerciseCreate> activeExercises) {
         Map<Long, Exercise> exercisesById = new LinkedHashMap<>();
         for (Exercise exercise : exerciseRepository.findAllById(
                 activeExercises.stream()
                         .map(WorkoutCreate.WorkoutExerciseCreate::getExerciseId)
-                        .filter(id -> id != null)
+                        .filter(exerciseId -> exerciseId != null)
                         .toList())) {
             exercisesById.put(exercise.getId(), exercise);
         }
 
-        Workout workout = new Workout();
-        workout.setName(workoutName);
-        workout.setDescription(workoutCreate.getDescription());
-        workout.setWorkoutExercises(buildWorkoutExercises(workout, activeExercises, exercisesById));
-
-        return workoutRepository.save(workout);
+        return exercisesById;
     }
 
     private Set<WorkoutExercise> buildWorkoutExercises(
