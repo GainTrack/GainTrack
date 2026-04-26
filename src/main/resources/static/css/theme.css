@@ -3,6 +3,19 @@
     border-radius: 1rem;
 }
 
+.login-submit-btn {
+    --bs-btn-color: #ffffff;
+    --bs-btn-bg: #4f46e5;
+    --bs-btn-border-color: #4f46e5;
+    --bs-btn-hover-color: #ffffff;
+    --bs-btn-hover-bg: #4338ca;
+    --bs-btn-hover-border-color: #4338ca;
+    --bs-btn-active-color: #ffffff;
+    --bs-btn-active-bg: #3730a3;
+    --bs-btn-active-border-color: #3730a3;
+    --bs-btn-focus-shadow-rgb: 79, 70, 229;
+}
+
 .hover-lift {
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
