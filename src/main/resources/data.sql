@@ -1,3 +1,27 @@
+CREATE TABLE IF NOT EXISTS app_user (
+    id BIGSERIAL PRIMARY KEY,
+    username VARCHAR(50) NOT NULL,
+    email VARCHAR(120) NOT NULL,
+    password_hash VARCHAR(100) NOT NULL,
+    role VARCHAR(20) NOT NULL,
+    enabled BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT uk_app_user_username UNIQUE (username),
+    CONSTRAINT uk_app_user_email UNIQUE (email),
+    CONSTRAINT ck_app_user_role CHECK (role IN ('ADMIN', 'USER'))
+);
+
+INSERT INTO app_user (username, email, password_hash, role, enabled)
+VALUES
+    -- plaintext password for both seeded users: password123
+    ('admin', 'admin@gaintrack.local', '$2a$10$jTgiZH.KfbN4wSuITusPeOpiWtZZyByLzfWDhxtCPxxigbGUGL/DC', 'ADMIN', TRUE),
+    ('marko', 'user@gaintrack.local', '$2a$10$jTgiZH.KfbN4wSuITusPeOpiWtZZyByLzfWDhxtCPxxigbGUGL/DC', 'USER', TRUE)
+ON CONFLICT (username) DO UPDATE
+SET email = EXCLUDED.email,
+    password_hash = EXCLUDED.password_hash,
+    role = EXCLUDED.role,
+    enabled = EXCLUDED.enabled;
+
 -- Muscle Groups
 INSERT INTO muscle_group (name) VALUES
                                     ('Chest'),

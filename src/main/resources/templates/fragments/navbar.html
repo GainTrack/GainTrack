@@ -14,7 +14,7 @@
         </button>
 
         <div class="collapse navbar-collapse" id="appNavbarNav">
-            <ul class="navbar-nav ms-auto gap-lg-2">
+            <ul class="navbar-nav ms-auto gap-lg-2 align-items-lg-center">
                 <li class="nav-item">
                     <a class="nav-link app-nav-link"
                        th:classappend="${activePage == 'dashboard' ? ' active' : ''}"
@@ -35,6 +35,12 @@
                        th:href="@{/workouts}">
                         Workouts
                     </a>
+                </li>
+                <li class="nav-item ms-lg-2">
+                    <form th:action="@{/logout}" method="post" class="m-0">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                        <button type="submit" class="btn btn-outline-secondary btn-sm">Logout</button>
+                    </form>
                 </li>
             </ul>
         </div>
