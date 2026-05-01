@@ -5,6 +5,7 @@ import hr.tvz.gaintrack.model.Workout;
 import hr.tvz.gaintrack.service.WorkoutService;
 import jakarta.validation.Valid;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,6 +28,7 @@ public class WorkoutController {
     @GetMapping
     public String showWorkoutList(Authentication authentication, Model model) {
         model.addAttribute("workouts", workoutService.getAllWorkouts(authentication.getName()));
+        model.addAttribute("isAdmin", isAdmin(authentication));
         return "workouts/index";
     }
 
@@ -38,10 +40,7 @@ public class WorkoutController {
     }
 
     @PostMapping
-    public String createWorkout(@Valid @ModelAttribute("workoutCreate") WorkoutCreate workoutCreate,
-                                BindingResult bindingResult,
-                                Authentication authentication,
-                                Model model) {
+    public String createWorkout(@Valid @ModelAttribute("workoutCreate") WorkoutCreate workoutCreate, BindingResult bindingResult, Authentication authentication, Model model) {
         if (bindingResult.hasErrors()) {
             model.addAttribute("availableExercises", workoutService.findAllExercises());
             return "workouts/create";
@@ -58,19 +57,24 @@ public class WorkoutController {
     }
 
     @GetMapping("/{id}")
-    public String showWorkoutDetails(@PathVariable Long id,
-                                     Authentication authentication,
-                                     Model model) {
+    public String showWorkoutDetails(@PathVariable Long id, Authentication authentication, Model model) {
         Workout workout = workoutService.getWorkoutById(id, authentication.getName());
         model.addAttribute("workout", workout);
+        model.addAttribute("isAdmin", isAdmin(authentication));
         return "workouts/details";
     }
 
     @GetMapping("/{id}/edit")
-    public String showEditForm(@PathVariable Long id, Authentication authentication, Model model) {
-        model.addAttribute("workoutCreate", workoutService.getWorkoutFormById(id, authentication.getName()));
-        populateWorkoutFormModel(model, id);
-        return "workouts/edit";
+    public String showEditForm(@PathVariable Long id,
+                               Authentication authentication,
+                               Model model) {
+        try {
+            model.addAttribute("workoutCreate", workoutService.getWorkoutFormById(id, authentication.getName(), isAdmin(authentication)));
+            populateWorkoutFormModel(model, id);
+            return "workouts/edit";
+        } catch (IllegalArgumentException exception) {
+            return "redirect:/workouts";
+        }
     }
 
     @PostMapping("/{id}/edit")
@@ -85,7 +89,7 @@ public class WorkoutController {
         }
 
         try {
-            Workout workout = workoutService.updateWorkout(id, workoutCreate, authentication.getName());
+            Workout workout = workoutService.updateWorkout(id, workoutCreate, authentication.getName(), isAdmin(authentication));
             return "redirect:/workouts/" + workout.getId();
         } catch (IllegalArgumentException exception) {
             bindingResult.reject("workout.update.failed", exception.getMessage());
@@ -97,7 +101,12 @@ public class WorkoutController {
     @PostMapping("/{id}/delete")
     public String deleteWorkout(@PathVariable Long id,
                                 Authentication authentication) {
-        workoutService.deleteById(id, authentication.getName());
+        try {
+            workoutService.deleteById(id, authentication.getName(), isAdmin(authentication));
+        } catch (IllegalArgumentException exception) {
+            return "redirect:/workouts";
+        }
+
         return "redirect:/workouts";
     }
 
@@ -134,5 +143,12 @@ public class WorkoutController {
     private void populateWorkoutFormModel(Model model, Long workoutId) {
         model.addAttribute("workoutId", workoutId);
         model.addAttribute("availableExercises", workoutService.findAllExercises());
+    }
+
+    private boolean isAdmin(Authentication authentication) {
+        return authentication != null
+                && authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .anyMatch("ROLE_ADMIN"::equals);
     }
 }

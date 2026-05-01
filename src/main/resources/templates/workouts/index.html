@@ -84,13 +84,13 @@
                             View details
                         </a>
 
-                        <a th:if="${!workout.shared}"
+                        <a th:if="${!workout.shared or isAdmin}"
                            th:href="@{/workouts/{id}/edit(id=${workout.id})}"
                            class="btn btn-outline-secondary flex-fill">
                             Edit
                         </a>
 
-                        <form th:if="${!workout.shared}"
+                        <form th:if="${!workout.shared or isAdmin}"
                               th:action="@{/workouts/{id}/delete(id=${workout.id})}"
                               method="post"
                               class="flex-fill">
