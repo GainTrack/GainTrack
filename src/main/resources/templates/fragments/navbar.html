@@ -36,6 +36,13 @@
                         Workouts
                     </a>
                 </li>
+                <li class="nav-item" th:if="${isAdmin}">
+                    <a class="nav-link app-nav-link"
+                       th:classappend="${activePage == 'adminUsers' ? ' active' : ''}"
+                       th:href="@{/admin/users}">
+                        Admin
+                    </a>
+                </li>
                 <li class="nav-item ms-lg-2">
                     <form th:action="@{/logout}" method="post" class="m-0">
                         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
@@ -48,6 +55,5 @@
 </nav>
 </body>
 </html>
-
 
 
