@@ -4,6 +4,7 @@ import hr.tvz.gaintrack.dto.WorkoutCreate;
 import hr.tvz.gaintrack.model.Workout;
 import hr.tvz.gaintrack.service.WorkoutService;
 import jakarta.validation.Valid;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,8 +25,8 @@ public class WorkoutController {
     }
 
     @GetMapping
-    public String showWorkoutList(Model model) {
-        model.addAttribute("workouts", workoutService.getAllWorkouts());
+    public String showWorkoutList(Authentication authentication, Model model) {
+        model.addAttribute("workouts", workoutService.getAllWorkouts(authentication.getName()));
         return "workouts/index";
     }
 
@@ -39,6 +40,7 @@ public class WorkoutController {
     @PostMapping
     public String createWorkout(@Valid @ModelAttribute("workoutCreate") WorkoutCreate workoutCreate,
                                 BindingResult bindingResult,
+                                Authentication authentication,
                                 Model model) {
         if (bindingResult.hasErrors()) {
             model.addAttribute("availableExercises", workoutService.findAllExercises());
@@ -46,7 +48,7 @@ public class WorkoutController {
         }
 
         try {
-            Workout workout = workoutService.createWorkout(workoutCreate);
+            Workout workout = workoutService.createWorkout(workoutCreate, authentication.getName());
             return "redirect:/workouts/" + workout.getId();
         } catch (IllegalArgumentException exception) {
             bindingResult.reject("workout.create.failed", exception.getMessage());
@@ -56,15 +58,17 @@ public class WorkoutController {
     }
 
     @GetMapping("/{id}")
-    public String showWorkoutDetails(@PathVariable Long id, Model model) {
-        Workout workout = workoutService.getWorkoutById(id);
+    public String showWorkoutDetails(@PathVariable Long id,
+                                     Authentication authentication,
+                                     Model model) {
+        Workout workout = workoutService.getWorkoutById(id, authentication.getName());
         model.addAttribute("workout", workout);
         return "workouts/details";
     }
 
     @GetMapping("/{id}/edit")
-    public String showEditForm(@PathVariable Long id, Model model) {
-        model.addAttribute("workoutCreate", workoutService.getWorkoutFormById(id));
+    public String showEditForm(@PathVariable Long id, Authentication authentication, Model model) {
+        model.addAttribute("workoutCreate", workoutService.getWorkoutFormById(id, authentication.getName()));
         populateWorkoutFormModel(model, id);
         return "workouts/edit";
     }
@@ -73,6 +77,7 @@ public class WorkoutController {
     public String editWorkout(@PathVariable Long id,
                               @Valid @ModelAttribute("workoutCreate") WorkoutCreate workoutCreate,
                               BindingResult bindingResult,
+                              Authentication authentication,
                               Model model) {
         if (bindingResult.hasErrors()) {
             populateWorkoutFormModel(model, id);
@@ -80,7 +85,7 @@ public class WorkoutController {
         }
 
         try {
-            Workout workout = workoutService.updateWorkout(id, workoutCreate);
+            Workout workout = workoutService.updateWorkout(id, workoutCreate, authentication.getName());
             return "redirect:/workouts/" + workout.getId();
         } catch (IllegalArgumentException exception) {
             bindingResult.reject("workout.update.failed", exception.getMessage());
@@ -90,8 +95,9 @@ public class WorkoutController {
     }
 
     @PostMapping("/{id}/delete")
-    public String deleteWorkout(@PathVariable Long id) {
-        workoutService.deleteById(id);
+    public String deleteWorkout(@PathVariable Long id,
+                                Authentication authentication) {
+        workoutService.deleteById(id, authentication.getName());
         return "redirect:/workouts";
     }
 

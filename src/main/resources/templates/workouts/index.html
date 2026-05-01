@@ -36,11 +36,23 @@
         <div class="col-md-6 col-xl-4" th:each="workout : ${workouts}">
             <div class="card h-100 shadow-sm app-card hover-lift">
                 <div class="card-body d-flex flex-column">
-                    <div class="d-flex align-items-center gap-2 mb-2">
-                        <span class="icon-bubble bg-primary-subtle text-primary-emphasis">
-                            <i class="bi bi-journal-check"></i>
+                    <div class="d-flex align-items-start justify-content-between gap-2 mb-2">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="icon-bubble bg-primary-subtle text-primary-emphasis">
+                                <i class="bi bi-journal-check"></i>
+                            </span>
+                            <h2 class="h5 mb-0" th:text="${workout.name}">Workout name</h2>
+                        </div>
+
+                        <span th:if="${workout.shared}"
+                              class="badge rounded-pill workout-template-badge">
+                            <i class="bi bi-stars me-1"></i>Template
                         </span>
-                        <h2 class="h5 mb-0" th:text="${workout.name}">Workout name</h2>
+
+                        <span th:unless="${workout.shared}"
+                              class="badge rounded-pill workout-owned-badge">
+                            <i class="bi bi-person-check me-1"></i>My workout
+                        </span>
                     </div>
 
                     <p class="text-secondary"
@@ -71,10 +83,17 @@
                         <a th:href="@{/workouts/{id}(id=${workout.id})}" class="btn btn-outline-primary flex-fill">
                             View details
                         </a>
-                        <a th:href="@{/workouts/{id}/edit(id=${workout.id})}" class="btn btn-outline-secondary flex-fill">
+
+                        <a th:if="${!workout.shared}"
+                           th:href="@{/workouts/{id}/edit(id=${workout.id})}"
+                           class="btn btn-outline-secondary flex-fill">
                             Edit
                         </a>
-                        <form th:action="@{/workouts/{id}/delete(id=${workout.id})}" method="post" class="flex-fill">
+
+                        <form th:if="${!workout.shared}"
+                              th:action="@{/workouts/{id}/delete(id=${workout.id})}"
+                              method="post"
+                              class="flex-fill">
                             <button type="submit" class="btn btn-outline-danger w-100">Delete</button>
                         </form>
                     </div>

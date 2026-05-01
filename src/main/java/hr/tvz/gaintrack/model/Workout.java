@@ -23,6 +23,13 @@ public class Workout {
     @Column(length = 1000)
     private String description;
 
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @JoinColumn(name = "owner_id", nullable = false)
+    private AppUser owner;
+
+    @Column(nullable = false)
+    private boolean shared = false;
+
     @OneToMany(mappedBy = "workout", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("position ASC")
     private Set<WorkoutExercise> workoutExercises = new LinkedHashSet<>();
@@ -63,6 +70,22 @@ public class Workout {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public AppUser getOwner() {
+        return owner;
+    }
+
+    public boolean isShared() {
+        return shared;
+    }
+
+    public void setOwner(AppUser owner) {
+        this.owner = owner;
+    }
+
+    public void setShared(boolean shared) {
+        this.shared = shared;
     }
 
     public void setWorkoutExercises(Set<WorkoutExercise> workoutExercises) {
