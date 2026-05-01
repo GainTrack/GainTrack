@@ -48,12 +48,21 @@ public class WorkoutService {
                 .orElseThrow(() -> new IllegalArgumentException("Workout not found or not accessible."));
     }
 
+    private Workout getEditableWorkoutById(Long id, String username, boolean admin) {
+        if (admin) {
+            return workoutRepository.findWithDetailsById(id)
+                    .orElseThrow(() -> new IllegalArgumentException("Workout not found with id: " + id));
+        }
+
+        return getOwnedWorkoutById(id, username);
+    }
+
     public List<Exercise> findAllExercises() {
         return exerciseRepository.findAllByOrderByNameAsc();
     }
 
-    public WorkoutCreate getWorkoutFormById(Long id, String username) {
-        Workout workout = getOwnedWorkoutById(id, username);
+    public WorkoutCreate getWorkoutFormById(Long id, String username, boolean admin) {
+        Workout workout = getEditableWorkoutById(id, username, admin);
 
         WorkoutCreate workoutCreate = new WorkoutCreate();
         workoutCreate.setName(workout.getName());
@@ -67,10 +76,8 @@ public class WorkoutService {
     }
 
     @Transactional
-    public void deleteById(Long id, String username) {
-        Workout workout = workoutRepository.findWithDetailsByIdAndOwnerUsername(id, username)
-                .orElseThrow(() -> new IllegalArgumentException("Workout not found or not accessible."));
-
+    public void deleteById(Long id, String username, boolean admin) {
+        Workout workout = getEditableWorkoutById(id, username, admin);
         workoutRepository.delete(workout);
     }
 
@@ -100,8 +107,8 @@ public class WorkoutService {
     }
 
     @Transactional
-    public Workout updateWorkout(Long id, WorkoutCreate workoutCreate, String username) {
-        Workout workout = getOwnedWorkoutById(id, username);
+    public Workout updateWorkout(Long id, WorkoutCreate workoutCreate, String username, boolean admin) {
+        Workout workout = getEditableWorkoutById(id, username, admin);
 
         String workoutName = requireWorkoutName(workoutCreate);
 
