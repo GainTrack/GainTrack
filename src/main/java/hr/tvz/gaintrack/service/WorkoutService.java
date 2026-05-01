@@ -6,6 +6,8 @@ import hr.tvz.gaintrack.model.ExerciseType;
 import hr.tvz.gaintrack.model.Workout;
 import hr.tvz.gaintrack.model.WorkoutExercise;
 import hr.tvz.gaintrack.model.WorkoutExerciseSet;
+import hr.tvz.gaintrack.model.AppUser;
+import hr.tvz.gaintrack.repository.AppUserRepository;
 import hr.tvz.gaintrack.repository.ExerciseRepository;
 import hr.tvz.gaintrack.repository.WorkoutRepository;
 import org.springframework.stereotype.Service;
@@ -24,28 +26,34 @@ public class WorkoutService {
 
     private final WorkoutRepository workoutRepository;
     private final ExerciseRepository exerciseRepository;
+    private final AppUserRepository appUserRepository;
 
-    public WorkoutService(WorkoutRepository workoutRepository, ExerciseRepository exerciseRepository) {
+    public WorkoutService(WorkoutRepository workoutRepository, ExerciseRepository exerciseRepository, AppUserRepository appUserRepository) {
         this.workoutRepository = workoutRepository;
         this.exerciseRepository = exerciseRepository;
+        this.appUserRepository = appUserRepository;
     }
 
-    public List<Workout> getAllWorkouts() {
-        return workoutRepository.findAllByOrderByNameAsc();
+    public List<Workout> getAllWorkouts(String username) {
+        return workoutRepository.findVisibleByUsernameOrderByNameAsc(username);
     }
 
-    public Workout getWorkoutById(Long id) {
-        return workoutRepository.findWithDetailsById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Workout not found with id: " + id));
+    public Workout getWorkoutById(Long id, String username) {
+        return workoutRepository.findVisibleWithDetailsByIdAndUsername(id, username)
+                .orElseThrow(() -> new IllegalArgumentException("Workout not found or not accessible."));
+    }
+
+    public Workout getOwnedWorkoutById(Long id, String username) {
+        return workoutRepository.findWithDetailsByIdAndOwnerUsername(id, username)
+                .orElseThrow(() -> new IllegalArgumentException("Workout not found or not accessible."));
     }
 
     public List<Exercise> findAllExercises() {
         return exerciseRepository.findAllByOrderByNameAsc();
     }
 
-    public WorkoutCreate getWorkoutFormById(Long id) {
-        Workout workout = workoutRepository.findWithDetailsById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Workout not found with id: " + id));
+    public WorkoutCreate getWorkoutFormById(Long id, String username) {
+        Workout workout = getOwnedWorkoutById(id, username);
 
         WorkoutCreate workoutCreate = new WorkoutCreate();
         workoutCreate.setName(workout.getName());
@@ -59,15 +67,15 @@ public class WorkoutService {
     }
 
     @Transactional
-    public void deleteById(Long id) {
-        Workout workout = workoutRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Workout not found with id: " + id));
+    public void deleteById(Long id, String username) {
+        Workout workout = workoutRepository.findWithDetailsByIdAndOwnerUsername(id, username)
+                .orElseThrow(() -> new IllegalArgumentException("Workout not found or not accessible."));
 
         workoutRepository.delete(workout);
     }
 
     @Transactional
-    public Workout createWorkout(WorkoutCreate workoutCreate) {
+    public Workout createWorkout(WorkoutCreate workoutCreate, String username){
         String workoutName = requireWorkoutName(workoutCreate);
 
         if (workoutRepository.existsByNameIgnoreCase(workoutName)) {
@@ -78,18 +86,22 @@ public class WorkoutService {
         validateActiveExercises(activeExercises);
         Map<Long, Exercise> exercisesById = findExercisesById(activeExercises);
 
+        AppUser owner = appUserRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("User not found: " + username));
+
         Workout workout = new Workout();
         workout.setName(workoutName);
         workout.setDescription(workoutCreate.getDescription());
+        workout.setOwner(owner);
+        workout.setShared(false);
         workout.setWorkoutExercises(buildWorkoutExercises(workout, activeExercises, exercisesById));
 
         return workoutRepository.save(workout);
     }
 
     @Transactional
-    public Workout updateWorkout(Long id, WorkoutCreate workoutCreate) {
-        Workout workout = workoutRepository.findWithDetailsById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Workout not found with id: " + id));
+    public Workout updateWorkout(Long id, WorkoutCreate workoutCreate, String username) {
+        Workout workout = getOwnedWorkoutById(id, username);
 
         String workoutName = requireWorkoutName(workoutCreate);
 
