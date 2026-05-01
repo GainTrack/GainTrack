@@ -19,6 +19,7 @@ public class SecurityConfig {
                 .authenticationProvider(authenticationProvider)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/login", "/register", "/css/**", "/js/**", "/pics/**").permitAll()
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/", "/exercises/**", "/workouts/**").hasAnyRole("ADMIN", "USER")
                         .anyRequest().authenticated()
                 )
@@ -49,6 +50,5 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 }
-
 
 
