@@ -1,7 +1,9 @@
 package hr.tvz.gaintrack.service;
 
+import hr.tvz.gaintrack.model.AppUser;
 import hr.tvz.gaintrack.model.Exercise;
 import hr.tvz.gaintrack.model.MuscleGroup;
+import hr.tvz.gaintrack.repository.AppUserRepository;
 import hr.tvz.gaintrack.repository.ExerciseRepository;
 import hr.tvz.gaintrack.repository.MuscleGroupRepository;
 import hr.tvz.gaintrack.repository.WorkoutExerciseRepository;
@@ -18,30 +20,46 @@ public class ExerciseService {
     private final ExerciseRepository exerciseRepository;
     private final MuscleGroupRepository muscleGroupRepository;
     private final WorkoutExerciseRepository workoutExerciseRepository;
+    private final AppUserRepository appUserRepository;
 
     public ExerciseService(
             ExerciseRepository exerciseRepository,
             MuscleGroupRepository muscleGroupRepository,
-            WorkoutExerciseRepository workoutExerciseRepository
+            WorkoutExerciseRepository workoutExerciseRepository,
+            AppUserRepository appUserRepository
     ) {
         this.exerciseRepository = exerciseRepository;
         this.muscleGroupRepository = muscleGroupRepository;
         this.workoutExerciseRepository = workoutExerciseRepository;
+        this.appUserRepository = appUserRepository;
     }
 
-    public List<Exercise> findAll() {
-        return exerciseRepository.findAll();
+    public List<Exercise> findAll(String username) {
+        return exerciseRepository.findVisibleByUsernameOrderByNameAsc(username);
     }
 
-    public Exercise getExerciseById(Long id) {
-        return exerciseRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Exercise not found with id: " + id));
+    public Exercise getExerciseById(Long id, String username) {
+        return exerciseRepository.findVisibleByIdAndUsername(id, username)
+                .orElseThrow(() -> new IllegalArgumentException("Exercise not found or not accessible."));
+    }
+
+    private Exercise getEditableExerciseById(Long id, String username, boolean admin) {
+        if (admin) {
+            return exerciseRepository.findById(id)
+                    .orElseThrow(() -> new IllegalArgumentException("Exercise not found with id: " + id));
+        }
+
+        return exerciseRepository.findByIdAndOwnerUsername(id, username)
+                .orElseThrow(() -> new IllegalArgumentException("Exercise not found or not accessible."));
+    }
+
+    public Exercise getEditableExerciseForForm(Long id, String username, boolean admin) {
+        return getEditableExerciseById(id, username, admin);
     }
 
     @Transactional
-    public void deleteById(Long id) {
-        Exercise exercise = exerciseRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Exercise not found with id: " + id));
+    public void deleteById(Long id, String username, boolean admin) {
+        Exercise exercise = getEditableExerciseById(id, username, admin);
 
         if (workoutExerciseRepository.existsByExerciseId(id)) {
             throw new IllegalStateException("Exercise cannot be deleted because it is used in a workout.");
@@ -51,14 +69,12 @@ public class ExerciseService {
         exerciseRepository.delete(exercise);
     }
 
-    public List<Exercise> search(String search) {
+    public List<Exercise> search(String search, String username) {
         if (search == null || search.trim().isEmpty()) {
-            return exerciseRepository.findAllByOrderByNameAsc();
+            return exerciseRepository.findVisibleByUsernameOrderByNameAsc(username);
         }
 
-        String query = search.trim();
-        return exerciseRepository
-                .findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseOrderByNameAsc(query, query);
+        return exerciseRepository.searchVisibleByUsernameOrderByNameAsc(username, search.trim());
     }
 
     public List<MuscleGroup> findAllMuscleGroups() {
@@ -66,16 +82,19 @@ public class ExerciseService {
     }
 
     @Transactional
-    public void createExercise(Exercise exercise, List<Long> muscleGroupIds) {
-        exercise.setMuscleGroups(resolveMuscleGroups(muscleGroupIds));
+    public void createExercise(Exercise exercise, List<Long> muscleGroupIds, String username) {
+        AppUser owner = appUserRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("User not found: " + username));
 
+        exercise.setOwner(owner);
+        exercise.setShared(false);
+        exercise.setMuscleGroups(resolveMuscleGroups(muscleGroupIds));
         exerciseRepository.save(exercise);
     }
 
     @Transactional
-    public void updateExercise(Long id, Exercise exerciseData, List<Long> muscleGroupIds) {
-        Exercise exercise = exerciseRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Exercise not found with id: " + id));
+    public void updateExercise(Long id, Exercise exerciseData, List<Long> muscleGroupIds, String username, boolean admin) {
+        Exercise exercise = getEditableExerciseById(id, username, admin);
 
         exercise.setName(exerciseData.getName());
         exercise.setDescription(exerciseData.getDescription());

@@ -57,8 +57,8 @@ public class WorkoutService {
         return getOwnedWorkoutById(id, username);
     }
 
-    public List<Exercise> findAllExercises() {
-        return exerciseRepository.findAllByOrderByNameAsc();
+    public List<Exercise> findAllExercises(String username) {
+        return exerciseRepository.findVisibleByUsernameOrderByNameAsc(username);
     }
 
     public WorkoutCreate getWorkoutFormById(Long id, String username, boolean admin) {

@@ -4,6 +4,8 @@ import hr.tvz.gaintrack.model.Exercise;
 import hr.tvz.gaintrack.model.ExerciseType;
 import hr.tvz.gaintrack.model.MuscleGroup;
 import hr.tvz.gaintrack.service.ExerciseService;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,9 +27,12 @@ public class ExerciseController {
     }
 
     @GetMapping("/exercises")
-    public String getExercises(@RequestParam(required = false) String search, Model model) {
-        model.addAttribute("exercises", exerciseService.search(search));
+    public String getExercises(@RequestParam(required = false) String search,
+                               Authentication authentication,
+                               Model model) {
+        model.addAttribute("exercises", exerciseService.search(search, authentication.getName()));
         model.addAttribute("search", search);
+        model.addAttribute("isAdmin", isAdmin(authentication));
         return "exercises/index";
     }
 
@@ -41,41 +46,74 @@ public class ExerciseController {
 
     @PostMapping("/exercises")
     public String createExercise(@ModelAttribute Exercise exercise,
-                                 @RequestParam(required = false) List<Long> muscleGroupIds) {
-        exerciseService.createExercise(exercise, muscleGroupIds);
+                                 @RequestParam(required = false) List<Long> muscleGroupIds,
+                                 Authentication authentication) {
+        exerciseService.createExercise(exercise, muscleGroupIds, authentication.getName());
         return "redirect:/exercises";
     }
 
     @GetMapping("/exercises/{id}/edit")
-    public String showEditForm(@PathVariable Long id, Model model) {
-        Exercise exercise = exerciseService.getExerciseById(id);
-        model.addAttribute("exercise", exercise);
-        model.addAttribute("exerciseTypes", ExerciseType.values());
-        model.addAttribute("muscleGroups", exerciseService.findAllMuscleGroups());
-        model.addAttribute(
-                "selectedMuscleGroupIds",
-                exercise.getMuscleGroups().stream().map(MuscleGroup::getId).collect(Collectors.toSet())
-        );
-        return "exercises/edit";
+    public String showEditForm(@PathVariable Long id, Authentication authentication, Model model) {
+        try {
+            Exercise exercise = exerciseService.getEditableExerciseForForm(
+                    id,
+                    authentication.getName(),
+                    isAdmin(authentication)
+            );
+
+            model.addAttribute("exercise", exercise);
+            model.addAttribute("exerciseTypes", ExerciseType.values());
+            model.addAttribute("muscleGroups", exerciseService.findAllMuscleGroups());
+            model.addAttribute(
+                    "selectedMuscleGroupIds",
+                    exercise.getMuscleGroups().stream().map(MuscleGroup::getId).collect(Collectors.toSet())
+            );
+            return "exercises/edit";
+        } catch (IllegalArgumentException exception) {
+            return "redirect:/exercises";
+        }
     }
 
     @PostMapping("/exercises/{id}/edit")
     public String editExercise(@PathVariable Long id,
                                @ModelAttribute Exercise exercise,
-                               @RequestParam(required = false) List<Long> muscleGroupIds) {
-        exerciseService.updateExercise(id, exercise, muscleGroupIds);
+                               @RequestParam(required = false) List<Long> muscleGroupIds,
+                               Authentication authentication) {
+        try {
+            exerciseService.updateExercise(
+                    id,
+                    exercise,
+                    muscleGroupIds,
+                    authentication.getName(),
+                    isAdmin(authentication)
+            );
+        } catch (IllegalArgumentException exception) {
+            return "redirect:/exercises";
+        }
+
         return "redirect:/exercises";
     }
 
     @PostMapping("/exercises/{id}/delete")
-    public String deleteExercise(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+    public String deleteExercise(@PathVariable Long id,
+                                 Authentication authentication,
+                                 RedirectAttributes redirectAttributes) {
         try {
-            exerciseService.deleteById(id);
+            exerciseService.deleteById(id, authentication.getName(), isAdmin(authentication));
             redirectAttributes.addFlashAttribute("successMessage", "Exercise deleted.");
-        } catch (IllegalArgumentException | IllegalStateException exception) {
+        } catch (IllegalStateException exception) {
             redirectAttributes.addFlashAttribute("errorMessage", exception.getMessage());
+        } catch (IllegalArgumentException exception) {
+            return "redirect:/exercises";
         }
 
         return "redirect:/exercises";
+    }
+
+    private boolean isAdmin(Authentication authentication) {
+        return authentication != null
+                && authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .anyMatch(authority -> authority.equals("ROLE_ADMIN") || authority.equals("ADMIN"));
     }
 }
