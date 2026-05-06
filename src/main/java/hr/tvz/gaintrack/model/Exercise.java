@@ -28,6 +28,13 @@ public class Exercise {
     @Column(nullable = false)
     private ExerciseType type;
 
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @JoinColumn(name = "owner_id", nullable = false)
+    private AppUser owner;
+
+    @Column(nullable = false)
+    private boolean shared = false;
+
     @ManyToMany
     @JoinTable(
             name = "exercise_muscle_group",
@@ -49,11 +56,16 @@ public class Exercise {
     public String getName() { return name; }
     public String getDescription() { return description; }
     public ExerciseType getType() { return type; }
+    public AppUser getOwner() { return owner; }
+    public boolean isShared() { return shared; }
+
     public Set<MuscleGroup> getMuscleGroups() { return muscleGroups; }
 
     public void setId(Long id) { this.id = id; }
     public void setName(String name) { this.name = name; }
     public void setDescription(String description) { this.description = description; }
     public void setType(ExerciseType type) { this.type = type; }
+    public void setOwner(AppUser owner) { this.owner = owner; }
+    public void setShared(boolean shared) { this.shared = shared; }
     public void setMuscleGroups(Set<MuscleGroup> muscleGroups) { this.muscleGroups = muscleGroups; }
 }

@@ -33,16 +33,16 @@ public class WorkoutController {
     }
 
     @GetMapping("/new")
-    public String showCreateForm(Model model) {
+    public String showCreateForm(Authentication authentication, Model model) {
         model.addAttribute("workoutCreate", createEmptyWorkoutCreate());
-        model.addAttribute("availableExercises", workoutService.findAllExercises());
+        model.addAttribute("availableExercises", workoutService.findAllExercises(authentication.getName()));
         return "workouts/create";
     }
 
     @PostMapping
     public String createWorkout(@Valid @ModelAttribute("workoutCreate") WorkoutCreate workoutCreate, BindingResult bindingResult, Authentication authentication, Model model) {
         if (bindingResult.hasErrors()) {
-            model.addAttribute("availableExercises", workoutService.findAllExercises());
+            model.addAttribute("availableExercises", workoutService.findAllExercises(authentication.getName()));
             return "workouts/create";
         }
 
@@ -51,7 +51,7 @@ public class WorkoutController {
             return "redirect:/workouts/" + workout.getId();
         } catch (IllegalArgumentException exception) {
             bindingResult.reject("workout.create.failed", exception.getMessage());
-            model.addAttribute("availableExercises", workoutService.findAllExercises());
+            model.addAttribute("availableExercises", workoutService.findAllExercises(authentication.getName()));
             return "workouts/create";
         }
     }
@@ -70,7 +70,7 @@ public class WorkoutController {
                                Model model) {
         try {
             model.addAttribute("workoutCreate", workoutService.getWorkoutFormById(id, authentication.getName(), isAdmin(authentication)));
-            populateWorkoutFormModel(model, id);
+            populateWorkoutFormModel(model, id, authentication.getName());
             return "workouts/edit";
         } catch (IllegalArgumentException exception) {
             return "redirect:/workouts";
@@ -84,7 +84,7 @@ public class WorkoutController {
                               Authentication authentication,
                               Model model) {
         if (bindingResult.hasErrors()) {
-            populateWorkoutFormModel(model, id);
+            populateWorkoutFormModel(model, id, authentication.getName());
             return "workouts/edit";
         }
 
@@ -93,7 +93,7 @@ public class WorkoutController {
             return "redirect:/workouts/" + workout.getId();
         } catch (IllegalArgumentException exception) {
             bindingResult.reject("workout.update.failed", exception.getMessage());
-            populateWorkoutFormModel(model, id);
+            populateWorkoutFormModel(model, id, authentication.getName());
             return "workouts/edit";
         }
     }
@@ -111,10 +111,10 @@ public class WorkoutController {
     }
 
     @GetMapping("/form/exercise-row")
-    public String createExerciseRow(@RequestParam int exerciseIndex, Model model) {
+    public String createExerciseRow(@RequestParam int exerciseIndex, Authentication authentication, Model model) {
         model.addAttribute("exerciseIndex", exerciseIndex);
         model.addAttribute("exerciseForm", null);
-        model.addAttribute("availableExercises", workoutService.findAllExercises());
+        model.addAttribute("availableExercises", workoutService.findAllExercises(authentication.getName()));
         return "workouts/fragments/create-workout-rows :: createWorkoutExerciseRow";
     }
 
@@ -140,11 +140,10 @@ public class WorkoutController {
         return workoutCreate;
     }
 
-    private void populateWorkoutFormModel(Model model, Long workoutId) {
+    private void populateWorkoutFormModel(Model model, Long workoutId, String username) {
         model.addAttribute("workoutId", workoutId);
-        model.addAttribute("availableExercises", workoutService.findAllExercises());
+        model.addAttribute("availableExercises", workoutService.findAllExercises(username));
     }
-
     private boolean isAdmin(Authentication authentication) {
         return authentication != null
                 && authentication.getAuthorities().stream()

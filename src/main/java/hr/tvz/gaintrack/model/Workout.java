@@ -56,6 +56,14 @@ public class Workout {
         return description;
     }
 
+    public AppUser getOwner() {
+        return owner;
+    }
+
+    public boolean isShared() {
+        return shared;
+    }
+
     public Set<WorkoutExercise> getWorkoutExercises() {
         return workoutExercises;
     }
@@ -70,14 +78,6 @@ public class Workout {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public AppUser getOwner() {
-        return owner;
-    }
-
-    public boolean isShared() {
-        return shared;
     }
 
     public void setOwner(AppUser owner) {

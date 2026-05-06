@@ -35,18 +35,33 @@ INSERT INTO muscle_group (name) VALUES
     ON CONFLICT (name) DO NOTHING;
 
 -- Exercises
-INSERT INTO exercise (name, description, type) VALUES
-                                                   ('Bench Press', 'Barbell bench press on a flat bench.', 'STRENGTH'),
-                                                   ('Deadlift', 'Conventional barbell deadlift.', 'STRENGTH'),
-                                                   ('Squat', 'Barbell back squat.', 'STRENGTH'),
-                                                   ('Overhead Press', 'Standing barbell overhead press.', 'STRENGTH'),
-                                                   ('Pull Up', 'Bodyweight pull up on a bar.', 'STRENGTH'),
-                                                   ('Barbell Row', 'Bent-over barbell row.', 'STRENGTH'),
-                                                   ('Running', 'Outdoor or treadmill running.', 'CARDIO'),
-                                                   ('Cycling', 'Stationary or outdoor cycling.', 'CARDIO'),
-                                                   ('Plank', 'Isometric core hold.', 'STRENGTH'),
-                                                   ('Yoga Flow', 'Full body flexibility and mobility routine.', 'FLEXIBILITY')
-    ON CONFLICT (name) DO NOTHING;
+INSERT INTO exercise (name, description, type, owner_id, shared)
+SELECT exercise_name, exercise_description, exercise_type, owner.id, shared
+FROM (
+         VALUES
+             -- Shared exercise templates created by admin
+             ('Bench Press', 'Barbell bench press on a flat bench.', 'STRENGTH', 'admin', TRUE),
+             ('Deadlift', 'Conventional barbell deadlift.', 'STRENGTH', 'admin', TRUE),
+             ('Squat', 'Barbell back squat.', 'STRENGTH', 'admin', TRUE),
+             ('Overhead Press', 'Standing barbell overhead press.', 'STRENGTH', 'admin', TRUE),
+             ('Pull Up', 'Bodyweight pull up on a bar.', 'STRENGTH', 'admin', TRUE),
+             ('Barbell Row', 'Bent-over barbell row.', 'STRENGTH', 'admin', TRUE),
+             ('Running', 'Outdoor or treadmill running.', 'CARDIO', 'admin', TRUE),
+             ('Cycling', 'Stationary or outdoor cycling.', 'CARDIO', 'admin', TRUE),
+             ('Yoga Flow', 'Full body flexibility and mobility routine.', 'FLEXIBILITY', 'admin', TRUE),
+
+             -- Private exercises created by user
+             ('Plank', 'Isometric core hold.', 'STRENGTH', 'marko', FALSE),
+             ('Push Ups', 'Bodyweight chest and triceps exercise.', 'STRENGTH', 'marko', FALSE),
+             ('Mountain Climbers', 'Dynamic core and cardio bodyweight movement.', 'CARDIO', 'marko', FALSE),
+             ('Hip Mobility Drill', 'Light hip mobility and flexibility drill.', 'FLEXIBILITY', 'marko', FALSE)
+     ) AS seed(exercise_name, exercise_description, exercise_type, owner_username, shared)
+         JOIN app_user owner ON owner.username = seed.owner_username
+    ON CONFLICT (name) DO UPDATE
+                              SET description = EXCLUDED.description,
+                              type = EXCLUDED.type,
+                              owner_id = EXCLUDED.owner_id,
+                              shared = EXCLUDED.shared;
 
 -- Exercise - Muscle Group mappings
 INSERT INTO exercise_muscle_group (exercise_id, muscle_group_id)
@@ -66,7 +81,13 @@ FROM (
              ('Pull Up', 'Biceps'),
              ('Barbell Row', 'Back'),
              ('Barbell Row', 'Biceps'),
-             ('Plank', 'Core')
+             ('Plank', 'Core'),
+             ('Push Ups', 'Chest'),
+             ('Push Ups', 'Triceps'),
+             ('Mountain Climbers', 'Core'),
+             ('Mountain Climbers', 'Legs'),
+             ('Hip Mobility Drill', 'Glutes'),
+             ('Hip Mobility Drill', 'Legs')
      ) AS mapping(exercise_name, muscle_group_name)
          JOIN exercise e ON e.name = mapping.exercise_name
          JOIN muscle_group m ON m.name = mapping.muscle_group_name
@@ -91,7 +112,6 @@ FROM (
          JOIN app_user owner ON owner.username = seed.owner_username
     ON CONFLICT (name) DO NOTHING;
 
--- Workout - Exercise mappings
 -- Workout - Exercise mappings
 INSERT INTO workout_exercise (workout_id, exercise_id, position)
 SELECT w.id, e.id, mapping.position
