@@ -28,11 +28,23 @@ public class ExerciseController {
 
     @GetMapping("/exercises")
     public String getExercises(@RequestParam(required = false) String search,
+                               @RequestParam(required = false) ExerciseType type,
+                               @RequestParam(required = false) Long muscleGroupId,
                                Authentication authentication,
                                Model model) {
-        model.addAttribute("exercises", exerciseService.search(search, authentication.getName()));
+        String username = authentication.getName();
+
+        model.addAttribute("exercises",
+                exerciseService.filterExercises(search, type, muscleGroupId, username));
+
         model.addAttribute("search", search);
+        model.addAttribute("selectedType", type);
+        model.addAttribute("selectedMuscleGroupId", muscleGroupId);
+        model.addAttribute("exerciseTypes", ExerciseType.values());
+        model.addAttribute("muscleGroups", exerciseService.findAllMuscleGroups());
+        model.addAttribute("totalExercises", exerciseService.countVisibleExercises(username));
         model.addAttribute("isAdmin", isAdmin(authentication));
+
         return "exercises/index";
     }
 

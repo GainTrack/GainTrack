@@ -29,6 +29,16 @@
     <div class="card shadow-sm mb-3">
         <div class="card-body">
             <form th:action="@{/exercises}" method="get" class="row g-2 align-items-center">
+                <input th:if="${selectedType != null}"
+                       type="hidden"
+                       name="type"
+                       th:value="${selectedType}">
+
+                <input th:if="${selectedMuscleGroupId != null}"
+                       type="hidden"
+                       name="muscleGroupId"
+                       th:value="${selectedMuscleGroupId}">
+
                 <div class="col-12 col-md">
                     <input type="text"
                            name="search"
@@ -46,13 +56,56 @@
         </div>
     </div>
 
+    <div class="mb-4">
+        <div class="fw-semibold mb-2">Exercise type</div>
+
+        <div class="d-flex flex-wrap gap-2">
+            <a th:href="@{/exercises(search=${search}, muscleGroupId=${selectedMuscleGroupId})}"
+               class="btn btn-sm rounded-pill"
+               th:classappend="${selectedType == null} ? ' btn-primary' : ' btn-outline-secondary'">
+                All
+            </a>
+
+            <a th:each="exerciseType : ${exerciseTypes}"
+               th:href="@{/exercises(search=${search}, type=${exerciseType}, muscleGroupId=${selectedMuscleGroupId})}"
+               class="btn btn-sm rounded-pill"
+               th:classappend="${selectedType == exerciseType} ? ' btn-primary' : ' btn-outline-secondary'">
+
+            <span th:text="${exerciseType.name() == 'STRENGTH' ? 'Strength' : (exerciseType.name() == 'CARDIO' ? 'Cardio' : 'Flexibility')}">
+                Strength
+            </span>
+            </a>
+        </div>
+    </div>
+
+    <div class="mb-4">
+        <div class="fw-semibold mb-2">Muscle group</div>
+
+        <div class="d-flex flex-wrap gap-2">
+            <a th:href="@{/exercises(search=${search}, type=${selectedType})}"
+               class="btn btn-sm rounded-pill"
+               th:classappend="${selectedMuscleGroupId == null} ? ' btn-primary' : ' btn-outline-secondary'">
+                All
+            </a>
+
+            <a th:each="muscleGroup : ${muscleGroups}"
+               th:href="@{/exercises(search=${search}, type=${selectedType}, muscleGroupId=${muscleGroup.id})}"
+               class="btn btn-sm rounded-pill"
+               th:classappend="${selectedMuscleGroupId != null and selectedMuscleGroupId.equals(muscleGroup.id)} ? ' btn-primary' : ' btn-outline-secondary'"
+               th:text="${muscleGroup.name}">
+                Chest
+            </a>
+        </div>
+    </div>
+
     <div class="mb-3 text-secondary" th:if="${search != null && !#strings.isEmpty(search)}">
         Results for "<strong th:text="${search}">bench</strong>":
         <strong th:text="${#lists.size(exercises)}">0</strong>
     </div>
 
-    <div class="mb-3 text-secondary" th:if="${search == null || #strings.isEmpty(search)}">
-        Total exercises: <strong th:text="${#lists.size(exercises)}">0</strong>
+    <div class="mb-3 text-secondary">
+        Showing <strong th:text="${#lists.size(exercises)}">0</strong>
+        of <strong th:text="${totalExercises}">0</strong> exercises
     </div>
 
     <div class="alert alert-info" th:if="${#lists.isEmpty(exercises)}">

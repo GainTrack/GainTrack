@@ -2,6 +2,7 @@ package hr.tvz.gaintrack.service;
 
 import hr.tvz.gaintrack.model.AppUser;
 import hr.tvz.gaintrack.model.Exercise;
+import hr.tvz.gaintrack.model.ExerciseType;
 import hr.tvz.gaintrack.model.MuscleGroup;
 import hr.tvz.gaintrack.repository.AppUserRepository;
 import hr.tvz.gaintrack.repository.ExerciseRepository;
@@ -75,6 +76,39 @@ public class ExerciseService {
         }
 
         return exerciseRepository.searchVisibleByUsernameOrderByNameAsc(username, search.trim());
+    }
+
+    public List<Exercise> filterExercises(String search,
+                                          ExerciseType type,
+                                          Long muscleGroupId,
+                                          String username) {
+        return exerciseRepository.findVisibleByUsernameOrderByNameAsc(username).stream()
+                .filter(exercise -> matchesSearch(exercise, search))
+                .filter(exercise -> type == null || exercise.getType() == type)
+                .filter(exercise -> muscleGroupId == null || hasMuscleGroup(exercise, muscleGroupId))
+                .toList();
+    }
+
+    private boolean matchesSearch(Exercise exercise, String search) {
+        if (search == null || search.trim().isEmpty()) {
+            return true;
+        }
+
+        String query = search.trim().toLowerCase();
+
+        String name = exercise.getName() == null ? "" : exercise.getName().toLowerCase();
+        String description = exercise.getDescription() == null ? "" : exercise.getDescription().toLowerCase();
+
+        return name.contains(query) || description.contains(query);
+    }
+
+    private boolean hasMuscleGroup(Exercise exercise, Long muscleGroupId) {
+        return exercise.getMuscleGroups().stream()
+                .anyMatch(muscleGroup -> muscleGroup.getId().equals(muscleGroupId));
+    }
+
+    public int countVisibleExercises(String username) {
+        return exerciseRepository.findVisibleByUsernameOrderByNameAsc(username).size();
     }
 
     public List<MuscleGroup> findAllMuscleGroups() {
