@@ -114,7 +114,7 @@ class ExerciseControllerTest {
         assertThat(model.getAttribute("muscleGroups")).isEqualTo(List.of(chest, back));
         assertThat(model.getAttribute("selectedMuscleGroupIds")).isEqualTo(Set.of(10L, 11L));
         verify(exerciseService).getEditableExerciseForForm(100L, "marko", false);
-        verify(exerciseService).findAllM uscleGroups();
+        verify(exerciseService).findAllMuscleGroups();
     }
 
     @Test
