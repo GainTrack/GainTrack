@@ -55,13 +55,13 @@ class ExerciseControllerTest {
         when(exerciseService.search("press", "marko")).thenReturn(List.of(exercise));
 
         Model model = new ExtendedModelMap();
-        String view = exerciseController.getExercises("press", authentication("marko", "ROLE_USER"), model);
+        String view = exerciseController.getExercises("press", null, null, authentication("marko", "ROLE_USER"), model);
 
         assertThat(view).isEqualTo("exercises/index");
         assertThat(model.getAttribute("exercises")).isEqualTo(List.of(exercise));
         assertThat(model.getAttribute("search")).isEqualTo("press");
         assertThat(model.getAttribute("isAdmin")).isEqualTo(false);
-        verify(exerciseService).search("press", "marko");
+        verify(exerciseService).filterExercises("press", null, null, "marko");
     }
 
     @Test
@@ -70,7 +70,7 @@ class ExerciseControllerTest {
                 .thenReturn(List.of(exercise(101L, "Squat", "Leg exercise", ExerciseType.CARDIO, user(2L, "admin"), false, Set.of(back))));
 
         Model model = new ExtendedModelMap();
-        String view = exerciseController.getExercises(null, authentication("admin", "ROLE_ADMIN"), model);
+        String view = exerciseController.getExercises(null, null, null, authentication("admin", "ROLE_ADMIN"), model);
 
         assertThat(view).isEqualTo("exercises/index");
         assertThat(model.getAttribute("isAdmin")).isEqualTo(true);
@@ -114,7 +114,7 @@ class ExerciseControllerTest {
         assertThat(model.getAttribute("muscleGroups")).isEqualTo(List.of(chest, back));
         assertThat(model.getAttribute("selectedMuscleGroupIds")).isEqualTo(Set.of(10L, 11L));
         verify(exerciseService).getEditableExerciseForForm(100L, "marko", false);
-        verify(exerciseService).findAllM uscleGroups();
+        verify(exerciseService).findAllMuscleGroups();
     }
 
     @Test
