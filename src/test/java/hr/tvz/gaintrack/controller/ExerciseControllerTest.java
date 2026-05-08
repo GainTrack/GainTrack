@@ -52,21 +52,30 @@ class ExerciseControllerTest {
 
     @Test
     void getExercises_populatesModelAndReturnsIndexView() {
-        when(exerciseService.search("press", "marko")).thenReturn(List.of(exercise));
+        when(exerciseService.filterExercises("press", ExerciseType.STRENGTH, 10L, "marko")).thenReturn(List.of(exercise));
+        when(exerciseService.findAllMuscleGroups()).thenReturn(List.of(chest, back));
+        when(exerciseService.countVisibleExercises("marko")).thenReturn(3);
 
         Model model = new ExtendedModelMap();
-        String view = exerciseController.getExercises("press", null, null, authentication("marko", "ROLE_USER"), model);
+        String view = exerciseController.getExercises("press", ExerciseType.STRENGTH, 10L, authentication("marko", "ROLE_USER"), model);
 
         assertThat(view).isEqualTo("exercises/index");
         assertThat(model.getAttribute("exercises")).isEqualTo(List.of(exercise));
         assertThat(model.getAttribute("search")).isEqualTo("press");
+        assertThat(model.getAttribute("selectedType")).isEqualTo(ExerciseType.STRENGTH);
+        assertThat(model.getAttribute("selectedMuscleGroupId")).isEqualTo(10L);
+        assertThat(model.getAttribute("exerciseTypes")).isEqualTo(ExerciseType.values());
+        assertThat(model.getAttribute("muscleGroups")).isEqualTo(List.of(chest, back));
+        assertThat(model.getAttribute("totalExercises")).isEqualTo(3);
         assertThat(model.getAttribute("isAdmin")).isEqualTo(false);
-        verify(exerciseService).filterExercises("press", null, null, "marko");
+        verify(exerciseService).filterExercises("press", ExerciseType.STRENGTH, 10L, "marko");
+        verify(exerciseService).findAllMuscleGroups();
+        verify(exerciseService).countVisibleExercises("marko");
     }
 
     @Test
     void getExercises_marksAdminUsersInModel() {
-        when(exerciseService.search(null, "admin"))
+        when(exerciseService.filterExercises(null, null, null, "admin"))
                 .thenReturn(List.of(exercise(101L, "Squat", "Leg exercise", ExerciseType.CARDIO, user(2L, "admin"), false, Set.of(back))));
 
         Model model = new ExtendedModelMap();
@@ -74,6 +83,7 @@ class ExerciseControllerTest {
 
         assertThat(view).isEqualTo("exercises/index");
         assertThat(model.getAttribute("isAdmin")).isEqualTo(true);
+        verify(exerciseService).filterExercises(null, null, null, "admin");
     }
 
     @Test
@@ -232,6 +242,4 @@ class ExerciseControllerTest {
         return exercise;
     }
 }
-
-
 
