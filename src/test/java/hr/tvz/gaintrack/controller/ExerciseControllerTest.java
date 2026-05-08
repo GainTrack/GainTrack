@@ -52,28 +52,70 @@ class ExerciseControllerTest {
 
     @Test
     void getExercises_populatesModelAndReturnsIndexView() {
-        when(exerciseService.search("press", "marko")).thenReturn(List.of(exercise));
+        when(exerciseService.filterExercises("press", null, null, "marko"))
+                .thenReturn(List.of(exercise));
+        when(exerciseService.findAllMuscleGroups()).thenReturn(List.of(chest, back));
+        when(exerciseService.countVisibleExercises("marko")).thenReturn(1);
 
         Model model = new ExtendedModelMap();
-        String view = exerciseController.getExercises("press", authentication("marko", "ROLE_USER"), model);
+        String view = exerciseController.getExercises("press", null, null, authentication("marko", "ROLE_USER"), model);
 
         assertThat(view).isEqualTo("exercises/index");
         assertThat(model.getAttribute("exercises")).isEqualTo(List.of(exercise));
         assertThat(model.getAttribute("search")).isEqualTo("press");
+        assertThat(model.getAttribute("selectedType")).isNull();
+        assertThat(model.getAttribute("selectedMuscleGroupId")).isNull();
+        assertThat(model.getAttribute("exerciseTypes")).isEqualTo(ExerciseType.values());
+        assertThat(model.getAttribute("muscleGroups")).isEqualTo(List.of(chest, back));
+        assertThat(model.getAttribute("totalExercises")).isEqualTo(1);
         assertThat(model.getAttribute("isAdmin")).isEqualTo(false);
-        verify(exerciseService).search("press", "marko");
+
+        verify(exerciseService).filterExercises("press", null, null, "marko");
+        verify(exerciseService).findAllMuscleGroups();
+        verify(exerciseService).countVisibleExercises("marko");
     }
 
     @Test
     void getExercises_marksAdminUsersInModel() {
-        when(exerciseService.search(null, "admin"))
-                .thenReturn(List.of(exercise(101L, "Squat", "Leg exercise", ExerciseType.CARDIO, user(2L, "admin"), false, Set.of(back))));
+        Exercise squat = exercise(101L, "Squat", "Leg exercise", ExerciseType.CARDIO, user(2L, "admin"), false, Set.of(back));
+
+        when(exerciseService.filterExercises(null, null, null, "admin"))
+                .thenReturn(List.of(squat));
+        when(exerciseService.findAllMuscleGroups()).thenReturn(List.of(chest, back));
+        when(exerciseService.countVisibleExercises("admin")).thenReturn(1);
 
         Model model = new ExtendedModelMap();
-        String view = exerciseController.getExercises(null, authentication("admin", "ROLE_ADMIN"), model);
+        String view = exerciseController.getExercises(null, null, null, authentication("admin", "ROLE_ADMIN"), model);
 
         assertThat(view).isEqualTo("exercises/index");
+        assertThat(model.getAttribute("exercises")).isEqualTo(List.of(squat));
         assertThat(model.getAttribute("isAdmin")).isEqualTo(true);
+
+        verify(exerciseService).filterExercises(null, null, null, "admin");
+        verify(exerciseService).findAllMuscleGroups();
+        verify(exerciseService).countVisibleExercises("admin");
+    }
+
+    @Test
+    void getExercises_passesFilterParametersToService() {
+        when(exerciseService.filterExercises("bench", ExerciseType.STRENGTH, 10L, "marko"))
+                .thenReturn(List.of(exercise));
+        when(exerciseService.findAllMuscleGroups()).thenReturn(List.of(chest, back));
+        when(exerciseService.countVisibleExercises("marko")).thenReturn(5);
+
+        Model model = new ExtendedModelMap();
+        String view = exerciseController.getExercises("bench", ExerciseType.STRENGTH, 10L, authentication("marko", "ROLE_USER"), model);
+
+        assertThat(view).isEqualTo("exercises/index");
+        assertThat(model.getAttribute("exercises")).isEqualTo(List.of(exercise));
+        assertThat(model.getAttribute("search")).isEqualTo("bench");
+        assertThat(model.getAttribute("selectedType")).isEqualTo(ExerciseType.STRENGTH);
+        assertThat(model.getAttribute("selectedMuscleGroupId")).isEqualTo(10L);
+        assertThat(model.getAttribute("totalExercises")).isEqualTo(5);
+
+        verify(exerciseService).filterExercises("bench", ExerciseType.STRENGTH, 10L, "marko");
+        verify(exerciseService).findAllMuscleGroups();
+        verify(exerciseService).countVisibleExercises("marko");
     }
 
     @Test
