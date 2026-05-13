@@ -1,4 +1,4 @@
-package hr.tvz.gaintrack.e2e;
+package hr.tvz.gaintrack.controller;
 
 import hr.tvz.gaintrack.model.AppUser;
 import hr.tvz.gaintrack.model.UserRole;
@@ -36,7 +36,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Testcontainers
 @ActiveProfiles("test")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-class RegistrationFlowE2ETest {
+class RegistrationFlowTest {
 
     private static final DockerImageName POSTGRES_IMAGE = DockerImageName.parse("postgres:18");
 
